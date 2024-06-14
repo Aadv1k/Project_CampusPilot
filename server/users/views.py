@@ -51,7 +51,7 @@ def user_login(request):
 
     send_windows_notification("Verify your OTP", f"Here is your OTP, it will expire in 5 minutes {otp}")
 
-    return Response({"message": f"Sent OTP, it is {otp}"}, status=status.HTTP_200_OK)
+    return Response({"message": f"Sent an OTP to the provided mobile number."}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def user_verify(request):
