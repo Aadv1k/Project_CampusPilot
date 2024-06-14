@@ -1,0 +1,16 @@
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Virtual Environment
+**/.env
+
+# IDE/Editor specific files
+.vscode/
+.idea/
+*.iml
+
+# Others
+*.log
+*.swp
+.DS_Store
