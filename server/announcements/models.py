@@ -1,5 +1,7 @@
 from django.db import models
+
 from users.models import User
+from schools.models import School
 
 class AnnouncementScope(models.Model):
     STUDENT = 'student'
@@ -18,7 +20,6 @@ class AnnouncementScope(models.Model):
         (SUBJECT, 'Subject'),
     ]
 
-    ann_id = models.ForeignKey('Announcement', on_delete=models.CASCADE, related_name='scopes')
     scope_type = models.CharField(max_length=10, choices=SCOPE_CHOICES)
     filter_type = models.CharField(max_length=255, null=True, blank=True)
     filter_content = models.CharField(max_length=255, null=True, blank=True)
@@ -27,12 +28,14 @@ class AnnouncementScope(models.Model):
         return f"{self.scope_type} ({self.filter_content})"
 
 class Announcement(models.Model):
-    ann_from = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    ann_from = models.ForeignKey(User, on_delete=models.CASCADE)
+    ann_school_id = models.ForeignKey(School, on_delete=models.CASCADE)
     ann_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     content = models.TextField()
-    attachment = models.ManyToManyField('Attachment', related_name='announcements')
-
+    attachment = models.ManyToManyField('Attachment', related_name="announcements")
+    scope = models.ManyToManyField("AnnouncementScope", related_name="announcements")
+    
     def __str__(self):
         return self.title
 

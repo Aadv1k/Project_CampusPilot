@@ -38,7 +38,7 @@ class IsMember(permissions.BasePermission):
     def has_permission(self, request, view):
         school_id = view.kwargs.get("school_id")
         try:
-            School.objects.get(id=school_id)
+            School.objects.get(school_id=school_id)
         except School.DoesNotExist:
             raise exceptions.NotFound("Couldn't find school with that ID")
         return True
