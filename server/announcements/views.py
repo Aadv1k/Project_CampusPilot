@@ -1,18 +1,24 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from users.permissions import IsAuthenticated, IsMember, ReadAnnouncement, ReadWriteAnnouncement
+from users.permissions import (
+    IsAuthenticated,
+    IsMember,
+    ReadAnnouncement,
+    ReadWriteAnnouncement,
+)
 from .serializers import AnnouncementSerializer
 from api.exceptions import HTTPSerializerBadRequest
 from .models import Announcement, AnnouncementScope
+
 
 class AnnouncementsViewset(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsMember]
 
     def get_permissions(self):
         permission_classes = self.permission_classes
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action == "list" or self.action == "retrieve":
             permission_classes += [ReadAnnouncement]
-        elif self.action == 'create' or self.action == 'destroy':
+        elif self.action == "create" or self.action == "destroy":
             permission_classes += [ReadWriteAnnouncement]
         return [permission() for permission in permission_classes]
 
@@ -30,7 +36,7 @@ class AnnouncementsViewset(viewsets.ViewSet):
         serializer = AnnouncementSerializer(data=request.data)
         print(request.data)
         if serializer.is_valid():
-            #serializer.save()
+            # serializer.save()
             return Response(serializer.data)
         else:
             raise HTTPSerializerBadRequest(details=serializer.errors)
@@ -44,22 +50,21 @@ class AnnouncementsViewset(viewsets.ViewSet):
         for scope in announcement.scope.all():
             scope_type = scope.scope_type
             filter_content = scope.filter_content
-            # Check if the user matches the scope
-            if scope_type == 'student':
+            if scoe_type == "student":
                 if str(user.id) == filter_content:
                     return True
-            elif scope_type == 'teacher':
+            elif scope_type == "teacher":
                 if str(user.id) == filter_content:
                     return True
-            elif scope_type == 'all':
+            elif scope_type == "all":
                 return True
-            elif scope_type == 'standard':
+            elif scope_type == "standard":
                 if str(user.standard) == filter_content:
                     return True
-            elif scope_type == 'division':
+            elif scope_type == "division":
                 if str(user.division) == filter_content:
                     return True
-            elif scope_type == 'subject':
+            elif scope_type == "subject":
                 if str(user.subject) == filter_content:
                     return True
         return False
