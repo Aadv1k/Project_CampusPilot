@@ -20,9 +20,10 @@ INSTALLED_APPS = [
     "corsheaders",
 
     "api",
-    "announcements",
-    "users",
     "schools",
+    "users",
+    "classes",
+    "announcements",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True

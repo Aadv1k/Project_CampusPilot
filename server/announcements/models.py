@@ -3,49 +3,59 @@ from django.db import models
 from users.models import User
 
 class Announcement(models.Model):
-    id = models.AutoField(primary_key=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    ann_author = models.ForeignKey(User, on_delete=models.CASCADE)
-
+    announcer = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    content = models.TextField()
-
-    scope = models.ManyToManyField("AnnouncementScope", related_name="announcements")
-    attachments = models.ManyToManyField(
-        "Attachment", related_name="announcements", blank=True
-    )
+    body = models.TextField()
 
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = "Announcement"
+        verbose_name_plural = "Announcements"
+
 
 class AnnouncementScope(models.Model):
-    SCOPE_TYPES = ("student", "teacher", "all")
-    FILTER_TYPES = ("division", "standard", "subject_taught")
+    ANNOUNCEMENT_SCOPE_CHOICES = [
+        ("student", "Student"),
+        ("teacher", "Teacher"),
+        ("all", "All"),
+    ]
 
-    ann_id = models.ForeignKey(Announcement, on_delete=models.CASCADE)
-    scope_type = models.CharField(max_length=10, choices=[(elem, elem) for elem in SCOPE_TYPES])
-    filter_type = models.CharField(
-        max_length=255,
-        choices=[(elem, elem) for elem in FILTER_TYPES],
-        null=True,
-        blank=True
-    )
-    filter_content = models.CharField(max_length=255, null=True, blank=True)
+    FILTER_TYPE_CHOICES = [
+        ("division", "Division"),
+        ("standard", "Standard"),
+        ("full_name", "Full Name"),
+        ("department", "Department"),
+    ]
 
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
+    scope = models.CharField(max_length=10, choices=ANNOUNCEMENT_SCOPE_CHOICES)
+    filter_type = models.CharField(max_length=20, choices=FILTER_TYPE_CHOICES)
+    filter_content = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.scope_type} ({self.filter_content})"
+        return f"{self.announcement.title} - {self.scope}"
+
+    class Meta:
+        verbose_name = "Announcement Scope"
+        verbose_name_plural = "Announcement Scopes"
 
 
 class Attachment(models.Model):
-    attach_id = models.AutoField(primary_key=True)
+    ATTACHMENT_TYPE_CHOICES = [
+        ("docx", "DOCX"),
+        ("pdf", "PDF"),
+    ]
+
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
     file_name = models.CharField(max_length=255)
-    file_type = models.CharField(
-        max_length=10, choices=[("pdf", "PDF"), ("docx", "DOCX")]
-    )
-    file_path = models.TextField()
-    upload_date = models.DateTimeField(auto_now_add=True)
+    file_path = models.CharField(max_length=2048)
+    file_type = models.CharField(max_length=4, choices=ATTACHMENT_TYPE_CHOICES)
 
     def __str__(self):
-        return self.file_name
+        return f"{self.file_name} ({self.file_type})"
+
+    class Meta:
+        verbose_name = "Announcement Attachment"
+        verbose_name_plural = "Announcement Attachments"
