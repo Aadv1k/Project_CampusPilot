@@ -45,10 +45,19 @@ class HTTPSerializerBadRequest(HTTPException):
 
 def custom_exception_handler(exc, context):
     if isinstance(exc, HTTPException):
+        details = exc.details if not isinstance(exc, HTTPSerializerBadRequest) else { e_item[0]: str(e_item[1][0]) for e_item in exc.details.items() }
+
+        if details and 'non_field_errors' in details:
+            message = details.pop('non_field_errors')[0]
+        else:
+            message = exc.message
+
         return Response({
             "status": exc.status_code,
-            "message": exc.message,
-            "details": exc.details if not isinstance(exc, HTTPSerializerBadRequest) else { e_item[0]: e_item[1][0] for e_item in exc.details.items() },
+            "error": {
+                "message": message,
+                "details": details,
+            }
         }, status=exc.status_code)
     else:
         response = exception_handler(exc, context)
@@ -56,7 +65,9 @@ def custom_exception_handler(exc, context):
         if response is not None:
             response.data = {
                 "status": response.status_code,
-                "message": response.data["detail"],
-                "details": {}
+                "error": {
+                    "message": response.data["detail"],
+                    "details": {}
+                }
             }
         return response

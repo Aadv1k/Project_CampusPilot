@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-+aj23+4kbt-d5q+=1v$mkejj9x&m966rqdbiti(yqe(ykk--ek"
@@ -90,10 +91,19 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+TESTING = sys.argv[1:2] == ['test']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",
-    "DEFAULT_AUTHENTICATION_CLASSES": ["users.authentication.JWTAuthentication",]
+    "DEFAULT_AUTHENTICATION_CLASSES": ["users.authentication.JWTAuthentication",],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/min',
+        'user': '1000/day'
+    }
 }
