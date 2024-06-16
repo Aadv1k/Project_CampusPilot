@@ -54,7 +54,7 @@ def user_login(request):
     otp = generate_otp()
     mem_store.store(phone_number, otp)
 
-    send_windows_notification("Verify your OTP", f"Here is your OTP: {otp}. It will expire in 5 minutes.")
+    # send_windows_notification("Verify your OTP", f"Here is your OTP: {otp}. It will expire in 5 minutes.")
 
     return Response({"message": f"Sent an OTP to the provided mobile number."}, status=status.HTTP_200_OK)
 

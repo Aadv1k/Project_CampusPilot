@@ -3,16 +3,15 @@ from django.db import models
 from schools.models import School
 
 class User(models.Model):
-    SCHOOL_CHOICES = (
-        ('student', 'Student'),
-        ('teacher', 'Teacher'),
-    )
+    class UserTypeChoices(models.TextChoices):
+        student = "student", "Student",
+        teacher = "teacher", "Teacher",
 
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50)
-    user_type = models.CharField(max_length=10, choices=SCHOOL_CHOICES)
+    user_type = models.CharField(max_length=10, choices=UserTypeChoices.choices)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -23,15 +22,14 @@ class User(models.Model):
         ordering = ['last_name', 'first_name']
 
 class UserPermission(models.Model):
-    PERMISSION_CHOICES = [
-        ('read_announcements', 'Read Announcements'),
-        ('write_announcements', 'Write Announcements'),
-        ('write_users', 'Write Users'),
-        ('read_users', 'Read Users'),
-    ]
+    class UserPermissionChoices(models.TextChoices):
+        read_announcements = 'read_announcements', 'Read Announcements'
+        write_announcements = 'write_announcements', 'Write Announcements'
+        write_users = 'write_users', 'Write Users'
+        read_users  = 'read_users', 'Read Users'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="permissions")
-    type = models.CharField(max_length=20, choices=PERMISSION_CHOICES)
+    type = models.CharField(max_length=20, choices=UserPermissionChoices.choices)
 
     def __str__(self):
         return f"{self.user.first_name} - {self.type}"

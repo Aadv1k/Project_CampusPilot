@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from api.constants import COUNTRY_CODE_CHOICES
 
 class UserLoginSerializer(serializers.Serializer):
     """
@@ -14,8 +13,8 @@ class UserLoginSerializer(serializers.Serializer):
     - phone_number: Must contain only digits.
     """
 
-    phone_number = serializers.CharField(max_length=10, required=True)
-    country_code = serializers.ChoiceField(choices=COUNTRY_CODE_CHOICES, required=True)
+    phone_number = serializers.CharField(max_length=15, required=True)
+    country_code = serializers.CharField(max_length=3, required=True)
     device_token = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
     def validate_phone_number(self, value):
@@ -39,7 +38,7 @@ class UserVerificationSerializer(serializers.Serializer):
     - otp: Must be a string with a length of 6 characters.
     """
 
-    phone_number = serializers.CharField(max_length=10, required=True)
+    phone_number = serializers.CharField(max_length=15, required=True)
     otp = serializers.CharField(required=True)
 
     def validate_phone_number(self, value):
