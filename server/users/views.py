@@ -1,15 +1,15 @@
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import datetime, timedelta, timezone
 
 from django.conf import settings
 
-import jwt
 import random
 
+from utils.TokenManager import TokenManager, UserTokenPayload 
+
 from .serializers import UserVerificationSerializer, UserLoginSerializer
-from .models import User, UserContact
+from .models import UserContact
 from api.exceptions import HTTPSerializerBadRequest, HTTPBadRequest
 from api.OTPStore import otp_store_singleton_factory
 
@@ -21,10 +21,8 @@ otp_store = otp_store_singleton_factory("memory")
 
 generate_otp = lambda: ''.join(random.choices('0123456789', k=6))
 
-
-
 @api_view(['POST'])
-@throttle_classes([DisableThrottle if  settings.TESTING else OTPRequestThrottle])
+@throttle_classes([DisableThrottle if settings.TESTING else OTPRequestThrottle])
 def user_login(request):
     serializer = UserLoginSerializer(data=request.data)
 
@@ -58,18 +56,12 @@ def user_verify(request):
         raise HTTPBadRequest(message="User not found for the provided phone number and country code.")
 
     user = user_contact.user
-    access_token = get_access_token(user.id, user.first_name)
+    token = TokenManager.create_token(
+        UserTokenPayload(
+            user_id=user.id, 
+            user_name=f"{user.first_name} {user.last_name}", 
+            user_permissions= [perm.type for perm in user.permissions.all()]
+            )
+        )
 
-    return Response({"access_token": access_token}, status=status.HTTP_200_OK)
-
-def get_access_token(user_id, user_first_name):
-    now = datetime.now(timezone.utc)
-    payload = {
-        'user_id': user_id,
-        'user_first_name': user_first_name,
-        'exp': now + timedelta(days=TOKEN_EXPIRY_DAYS)
-    }
-
-    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-
-    return token
+    return Response({ "access_token": token }, status=status.HTTP_200_OK)

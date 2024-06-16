@@ -7,6 +7,8 @@ from users.models import User, UserPermission, UserContact
 
 from .OTPStore import otp_store_singleton_factory
 
+from utils.TokenManager import TokenManager
+
 from rest_framework.test import APIClient
 
 MOCK_PHONE = "1234567890"
@@ -82,3 +84,11 @@ class UserTests(TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.data.get("access_token"))
+
+        payload = TokenManager.decode_token(response.data.get("access_token"))
+        self.assertEqual(payload.user_name, "Robin Sharma")
+        self.assertIn(UserPermission.UserPermissionChoices.read_announcements, payload.user_permissions)
+
+
+class AnnouncementTests(TestCase):
+    pass
