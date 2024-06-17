@@ -28,8 +28,9 @@ class OTPManager:
 
     def delete_otp(self, phone_number: str) -> None:
         """Delete the stored OTP for a given phone number."""
-        mem_store.store(f"otp:{phone_number}", None)
-        mem_store.store(f"otp_expiry:{phone_number}", None)
+
+        mem_store.delete(f"otp:{phone_number}")
+        mem_store.delete(f"otp_expiry:{phone_number}")
 
     def is_otp_valid(self, phone_number: str, otp: str) -> bool:
         """Check if the provided OTP is valid."""

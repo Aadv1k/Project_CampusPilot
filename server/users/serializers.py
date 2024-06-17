@@ -80,10 +80,10 @@ class UserVerificationSerializer(serializers.Serializer):
         """
         Validate the OTP against stored OTP in memory store.
         """
-        phone_number = data['phone_number']
         received_otp = data['otp']
 
         full_phone_number = f"{data['country_code']}{data['phone_number']}"
+
 
         if not otp_manager.is_otp_valid(full_phone_number, received_otp):
             raise serializers.ValidationError("Sorry, the OTP you provided wasn't valid. Please try again later.")

@@ -31,12 +31,18 @@ class RedisStore:
     def store(self, key: str, data: Union[str, bytes]) -> None:
         self.redis_client.set(key, data)
 
-    def get(self, key: str) -> Optional[Union[str, bytes]]:
-        return self.redis_client.get(key)
+    def delete(self, key: str) -> None:
+        self.redis_client.delete(key)
 
+    def get(self, key: str) -> Optional[str]:
+        value = self.redis_client.get(key)
+
+        if isinstance(value, str):
+            return value
+        elif isinstance(value, bytes):
+            return value.decode("utf-8") 
+        
+        return None
 
 def mem_store_factory_singleton():
-    if settings.TESTING or settings.DEBUG:
-        return MemoryStore()
-    else:
-        return RedisStore()
+    return RedisStore() 

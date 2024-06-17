@@ -77,12 +77,12 @@ class UserTests(TestCase):
             "country_code":MOCK_COUNTRY_CODE
         })
 
-        generated_otp = otp_manager.get_otp(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}")
+        stored_otp = otp_manager.get_otp(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}")
 
         response = self.client.post(reverse("user_otp_verify"), {
             "phone_number": MOCK_PHONE,
             "country_code": MOCK_COUNTRY_CODE,
-            "otp": generated_otp
+            "otp": stored_otp
         })
         
         self.assertEqual(response.status_code, 200)
