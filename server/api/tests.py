@@ -5,7 +5,7 @@ import unittest
 from schools.models import School 
 
 from users.models import User, UserPermission, UserContact
-from announcements.models import AnnouncementScope
+from announcements.models import AnnouncementScope, Announcement, Attachment
 
 from .OTPStore import otp_store_singleton_factory
 
@@ -48,7 +48,7 @@ class UserTests(TestCase):
         self.user = user
     
     def test_user_bad_login(self):
-        response = self.client.post("/api/users/login", {
+        response = self.client.post(reverse("user_login"), {
             "phone_number": "29ihehbwhbeb",
             "country_code": "2292"
         })
@@ -58,21 +58,21 @@ class UserTests(TestCase):
         self.assertIsNotNone(response.data["error"]["details"]["country_code"])
 
     def test_non_existent_user_login(self):
-        response = self.client.post("/api/users/login", {
+        response = self.client.post(reverse("user_login"), {
             "phone_number": "1800801920",
             "country_code": "44"
         })
         self.assertEqual(response.status_code, 400)
     
     def test_successful_login(self):
-        response = self.client.post("/api/users/login", {
+        response = self.client.post(reverse("user_login"), {
             "phone_number": MOCK_PHONE,
             "country_code":MOCK_COUNTRY_CODE
         })
         self.assertEqual(response.status_code, 200)
 
     def test_otp_verification(self):
-        response = self.client.post("/api/users/login", {
+        response = self.client.post(reverse("user_login"), {
             "phone_number": MOCK_PHONE,
             "country_code":MOCK_COUNTRY_CODE
         })
@@ -80,7 +80,7 @@ class UserTests(TestCase):
         otp_store = otp_store_singleton_factory("memory")
         generated_otp = otp_store.retrieve(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}").otp
 
-        response = self.client.post("/api/users/otp_verify", {
+        response = self.client.post(reverse("user_otp_verify"), {
             "phone_number": MOCK_PHONE,
             "country_code": MOCK_COUNTRY_CODE,
             "otp": generated_otp
@@ -162,13 +162,15 @@ class AnnouncementTests(TestCase):
 
     def test_user_without_permissions_cannot_read_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_without_perms)
-        response = self.client.get(f"/api/{self.school.id}/announcements")
+        url = reverse("announcement_list", args=[self.school.id])
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 403)
 
     def test_invalid_announcement(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
-        response = self.client.post(f"/api/{self.school.id}/announcements", {
+        url = reverse("announcement_list", args=[self.school.id])
+        response = self.client.post(url, {
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
             "scope": [{}]
@@ -177,10 +179,10 @@ class AnnouncementTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data["error"]["details"]["scope"])
 
-        response = self.client.post(f"/api/{self.school.id}/announcements", {
+        response = self.client.post(url, {
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
-            "scope": [ 
+            "scope": [
                 { "scope": AnnouncementScope.ScopeContextChoices.all, },
                 { "scope": AnnouncementScope.ScopeContextChoices.student, },
             ]
@@ -189,10 +191,10 @@ class AnnouncementTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data["error"]["details"]["scope"])
 
-        response = self.client.post(f"/api/{self.school.id}/announcements", {
+        response = self.client.post(url, {
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
-            "scope": [ 
+            "scope": [
                 { "scope": AnnouncementScope.ScopeContextChoices.student, "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division, "filter_content": "whatever"},
             ]
         }, format="json")
@@ -200,10 +202,10 @@ class AnnouncementTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data["error"]["details"]["scope"])
 
-        response = self.client.post(f"/api/{self.school.id}/announcements", {
+        response = self.client.post(url, {
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
-            "scope": [ 
+            "scope": [
                 { "scope": AnnouncementScope.ScopeContextChoices.student, "filter_type": AnnouncementScope.ScopeFilterChoices.full_name, "filter_content": "foo"},
             ]
         }, format="json")
@@ -213,7 +215,8 @@ class AnnouncementTests(TestCase):
 
     def test_user_with_permissions_can_write_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
-        response = self.client.post(f"/api/{self.school.id}/announcements", data={
+        url = reverse("announcement_list", args=[self.school.id])
+        response = self.client.post(url, data={
             "title": "Test school announcement GOOD",
             "body": "This is an announcement to test out this system",
             "scope": [
@@ -222,16 +225,59 @@ class AnnouncementTests(TestCase):
         }, format="json")
         self.assertEqual(response.status_code, 201)
 
-    @unittest.skip("TODO")
     def test_user_can_update_their_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
-        self.skipTest()
 
-    @unittest.skip("TODO")
+        announcement = Announcement.objects.create(
+            announcer=self.user_with_permissions,
+            title="Old Announcement Title",
+            body="Old Announcement Body"
+        )
+        AnnouncementScope.objects.create(announcement=announcement, scope=AnnouncementScope.ScopeContextChoices.student)
+
+        url = reverse("announcement_detail", args=[self.school.id, announcement.id])
+        response = self.client.put(url, data={
+            "title": "Updated Announcement Title",
+            "body": "Updated Announcement Body",
+            "scope": [
+                { "scope": AnnouncementScope.ScopeContextChoices.all, },
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], "Updated Announcement Title")
+        self.assertEqual(response.data["body"], "Updated Announcement Body")
+
     def test_user_can_delete_their_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
-        self.skipTest()
 
-    @unittest.skip("TODO")
+        announcement = Announcement.objects.create(
+            announcer=self.user_with_permissions,
+            title="Announcement to Delete",
+            body="This announcement will be deleted."
+        )
+
+        url = reverse("announcement_detail", args=[self.school.id, announcement.id])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Announcement.objects.filter(id=announcement.id).exists())
+
     def test_user_can_create_announcement_with_attachment(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
+
+        url = reverse("announcement_list", args=[self.school.id])
+        response = self.client.post(url, data={
+            "title": "Announcement with Attachment",
+            "body": "This announcement has an attachment.",
+            "scope": [
+                { "scope": AnnouncementScope.ScopeContextChoices.all, },
+            ],
+            "attachments": [
+                { "file_name": "test_doc.pdf", "file_path": "/path/to/test_doc.pdf", "file_type": Attachment.FileTypeChoices.pdf }
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["title"], "Announcement with Attachment")
+        self.assertEqual(len(response.data["attachments"]), 1)
+        self.assertEqual(response.data["attachments"][0]["file_name"], "test_doc.pdf")

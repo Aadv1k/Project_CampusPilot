@@ -119,3 +119,22 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             )
 
         return announcement
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.body = validated_data.get('body', instance.body)
+        instance.save()
+
+        if 'scope' in validated_data:
+            scopes_data = validated_data.pop('scope')
+            instance.scope.all().delete()
+            for scope_item in scopes_data:
+                AnnouncementScope.objects.create(announcement=instance, **scope_item)
+
+        if 'attachments' in validated_data:
+            attachments_data = validated_data.pop('attachments')
+            instance.attachments.all().delete()
+            for attachment_item in attachments_data:
+                Attachment.objects.create(announcement=instance, **attachment_item)
+
+        return instance
