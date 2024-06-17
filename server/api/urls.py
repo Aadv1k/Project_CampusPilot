@@ -12,5 +12,5 @@ urlpatterns = [
     path("<int:school_id>/announcements", AnnouncementsViewset.as_view({
         'get': 'list',
         'post': 'create',
-    })),
+    }), name="announcement_list"),
 ]

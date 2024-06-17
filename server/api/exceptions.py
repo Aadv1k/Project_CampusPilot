@@ -45,7 +45,17 @@ class HTTPSerializerBadRequest(HTTPException):
 
 def custom_exception_handler(exc, context):
     if isinstance(exc, HTTPException):
-        details = exc.details if not isinstance(exc, HTTPSerializerBadRequest) else { e_item[0]: str(e_item[1][0]) for e_item in exc.details.items() }
+        details = {}
+        if isinstance(exc, HTTPSerializerBadRequest):
+            for e_key, e_value in exc.details.items():
+                if isinstance(e_value, list):
+                    details[e_key] = str(e_value[0])
+                elif isinstance(e_value, dict):
+                    details[e_key] = {nested_e_key: str(nested_e_val) for nested_e_key, nested_e_val in e_value.items()}
+                else:
+                    details[e_key] = str(e_value)
+        else:
+            details = exc.details
 
         if details and 'non_field_errors' in details:
             message = details.pop('non_field_errors')[0]
@@ -66,7 +76,7 @@ def custom_exception_handler(exc, context):
             response.data = {
                 "status": response.status_code,
                 "error": {
-                    "message": response.data["detail"],
+                    "message": response.data.get("detail", "An error occurred."),
                     "details": {}
                 }
             }

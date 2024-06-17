@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework import status
 from users.permissions import (
     IsAuthenticated,
     IsMember,
@@ -10,6 +11,7 @@ from .serializers import AnnouncementSerializer
 from api.exceptions import HTTPSerializerBadRequest
 from .models import Announcement, AnnouncementScope
 
+import copy
 
 class AnnouncementsViewset(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsMember]
@@ -33,11 +35,15 @@ class AnnouncementsViewset(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, school_id):
-        serializer = AnnouncementSerializer(data=request.data)
-        print(request.data)
+        data = copy.deepcopy(request.data)
+        data["announcer"] = request.user.id
+        serializer = AnnouncementSerializer(data=data)
         if serializer.is_valid():
-            # serializer.save()
-            return Response(serializer.data)
+            serializer.save()
+            return Response(
+                serializer.data, 
+                status=status.HTTP_201_CREATED
+            )
         else:
             raise HTTPSerializerBadRequest(details=serializer.errors)
 
@@ -50,7 +56,7 @@ class AnnouncementsViewset(viewsets.ViewSet):
         for scope in announcement.scope.all():
             scope_type = scope.scope_type
             filter_content = scope.filter_content
-            if scoe_type == "student":
+            if scope_type == "student":
                 if str(user.id) == filter_content:
                     return True
             elif scope_type == "teacher":

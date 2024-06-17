@@ -2,7 +2,7 @@
 **/__pycache__/
 *.py[cod]
 
-**/*.sqlite3/
+**/*.sqlite3
 
 # Virtual Environment
 **/.env

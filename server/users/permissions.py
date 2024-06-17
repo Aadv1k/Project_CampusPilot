@@ -4,7 +4,7 @@ from django.conf import settings
 import jwt
 from django.shortcuts import get_object_or_404
 from schools.models import School
-from .models import User
+from .models import User, UserPermission
 
 def extract_auth_header_from_request(request):
     auth = get_authorization_header(request).split()
@@ -38,13 +38,13 @@ class IsMember(permissions.BasePermission):
     def has_permission(self, request, view):
         school_id = view.kwargs.get("school_id")
         try:
-            School.objects.get(school_id=school_id)
+            School.objects.get(id=school_id)
         except School.DoesNotExist:
             raise exceptions.NotFound("Couldn't find school with that ID")
         return True
 
     def has_object_permission(self, request, view, school):
-        return User.objects.filter(user_id=request.user.user_id, school=school).exists()
+        return User.objects.filter(id=request.user.id, school=school).exists()
 
 class ReadAnnouncement(permissions.BasePermission):
     """
@@ -52,7 +52,7 @@ class ReadAnnouncement(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.permissions.filter(permission_code='read_announcement').exists()
+        return request.user.permissions.filter(type=UserPermission.UserPermissionChoices.read_announcements).exists()
 
 class ReadWriteAnnouncement(permissions.BasePermission):
     """
@@ -60,4 +60,4 @@ class ReadWriteAnnouncement(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.permissions.filter(permission_code='read_write_announcement').exists()
+        return request.user.permissions.filter(type=UserPermission.UserPermissionChoices.write_announcements).exists()

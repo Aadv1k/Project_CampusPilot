@@ -16,22 +16,21 @@ class Announcement(models.Model):
 
 
 class AnnouncementScope(models.Model):
-    
     class ScopeContextChoices(models.TextChoices):
         student = "student", "Student"
         teacher = "teacher", "Teacher"
         all = "all", "All"
         
     class ScopeFilterChoices(models.TextChoices):
-        division = "division", "Division"
+        standard_division = "standard_division", "Standard & Division"
         standard = "standard", "Standard"
         full_name = "full_name", "Full Name"
         department = "department", "Department"
 
-    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="scope")
     scope = models.CharField(max_length=10, choices=ScopeContextChoices.choices)
-    filter_type = models.CharField(max_length=20, choices=ScopeFilterChoices.choices)
-    filter_content = models.CharField(max_length=255)
+    filter_type = models.CharField(max_length=20, choices=ScopeFilterChoices.choices, null=True)
+    filter_content = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.announcement.title} - {self.scope}"
@@ -46,7 +45,7 @@ class Attachment(models.Model):
         docx = "docx", "DOCX"
         pdf = "pdf", "PDF"
 
-    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="attachments")
     file_name = models.CharField(max_length=255)
     file_path = models.CharField(max_length=2048)
     file_type = models.CharField(max_length=4, choices=FileTypeChoices.choices)
