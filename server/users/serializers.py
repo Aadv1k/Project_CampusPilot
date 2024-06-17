@@ -1,11 +1,8 @@
 from rest_framework import serializers
 from datetime import datetime, timedelta
-from api.OTPStore import otp_store_singleton_factory
+from utils.OTPManager import otp_manager
 
 from .models import UserContact
-
-otp_store = otp_store_singleton_factory("memory")
-
 
 class UserLoginSerializer(serializers.Serializer):
     """
@@ -88,21 +85,9 @@ class UserVerificationSerializer(serializers.Serializer):
 
         full_phone_number = f"{data['country_code']}{data['phone_number']}"
 
-        stored_data = otp_store.retrieve(full_phone_number)
-        if not stored_data:
-            raise serializers.ValidationError("OTP not found. Please request a new OTP.")
+        if not otp_manager.is_otp_valid(full_phone_number, received_otp):
+            raise serializers.ValidationError("Sorry, the OTP you provided wasn't valid. Please try again later.")
 
-        stored_otp, created_at = stored_data.otp, stored_data.created_at
-
-        expiry_time = created_at + timedelta(minutes=5)
-        current_time = datetime.now()
-        if current_time > expiry_time:
-            otp_store.delete(full_phone_number)
-            raise serializers.ValidationError("OTP has expired. Please request a new OTP.")
-
-        if stored_otp != received_otp:
-            raise serializers.ValidationError("Sorry, the OTP you sent didn't match. Please try again later.")
-
-        otp_store.delete(full_phone_number)
+        otp_manager.delete_otp(full_phone_number)
 
         return data

@@ -7,7 +7,7 @@ from schools.models import School
 from users.models import User, UserPermission, UserContact
 from announcements.models import AnnouncementScope, Announcement, Attachment
 
-from .OTPStore import otp_store_singleton_factory
+from utils.OTPManager import otp_manager
 
 from utils.TokenManager import TokenManager, UserTokenPayload
 
@@ -77,8 +77,7 @@ class UserTests(TestCase):
             "country_code":MOCK_COUNTRY_CODE
         })
 
-        otp_store = otp_store_singleton_factory("memory")
-        generated_otp = otp_store.retrieve(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}").otp
+        generated_otp = otp_manager.get_otp(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}")
 
         response = self.client.post(reverse("user_otp_verify"), {
             "phone_number": MOCK_PHONE,

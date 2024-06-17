@@ -11,15 +11,10 @@ from utils.TokenManager import TokenManager, UserTokenPayload
 from .serializers import UserVerificationSerializer, UserLoginSerializer
 from .models import UserContact
 from api.exceptions import HTTPSerializerBadRequest, HTTPBadRequest
-from api.OTPStore import otp_store_singleton_factory
 
 from .throttling import OTPRequestThrottle, DisableThrottle
 
-TOKEN_EXPIRY_DAYS = 7
-
-otp_store = otp_store_singleton_factory("memory")
-
-generate_otp = lambda: ''.join(random.choices('0123456789', k=6))
+from utils.OTPManager import otp_manager  
 
 @api_view(['POST'])
 @throttle_classes([DisableThrottle if settings.TESTING else OTPRequestThrottle])
@@ -31,10 +26,9 @@ def user_login(request):
 
     full_phone_number = f'{serializer.validated_data.get("country_code")}{serializer.validated_data.get("phone_number")}'
 
-    otp = generate_otp()
-    otp_store.store(full_phone_number, otp)
+    otp = otp_manager.create_and_store_otp(full_phone_number)
 
-    # Send OTP via SMS or other means (not implemented here)
+    # TODO: actually send the OTP messagve to the user 
 
     return Response({"message": f"Sent an OTP to the provided mobile number."}, status=status.HTTP_200_OK)
 
