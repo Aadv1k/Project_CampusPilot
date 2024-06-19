@@ -1,4 +1,4 @@
-import 'package:app/views/login_view.dart';
+import 'package:app/common/phone_number.dart';
 
 class UserModel {
   final String userId;
@@ -11,12 +11,9 @@ class UserModel {
       required this.accessToken});
 }
 
-class UserLoginModel {
+class UserLoginDetails {
+  final CountryCode phoneCountryCode;
   final String phoneNumber;
-  final CountryCode countryCode;
 
-  UserLoginModel({
-    required this.phoneNumber,
-    required this.countryCode,
-  });
+  const UserLoginDetails(this.phoneCountryCode, this.phoneNumber);
 }
