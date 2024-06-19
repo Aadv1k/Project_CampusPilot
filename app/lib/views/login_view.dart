@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:app/utils/sizes.dart';
 
@@ -15,36 +16,36 @@ class LoginView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            SvgPicture.asset(
-              "assets/placeholder_logo.svg",
-              width: 50,
-              height: 50,
-            ),
-            SizedBox(height: Spacing.md),
-            Text(
-              "Sign in",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+            Column(children: [
+              SvgPicture.asset(
+                "assets/placeholder_logo.svg",
+                width: 60,
+                height: 60,
               ),
-            ),
-            SizedBox(height: Spacing.xl),
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-                hintText: 'Eg 1234567890',
+              const SizedBox(height: Spacing.md),
+              const Text(
+                "Sign in",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 16.0),
+            ]),
+            const SizedBox(height: Spacing.xl),
+            PhoneNumberInput(),
+            const SizedBox(height: 16.0),
             MaterialButton(
               onPressed: () {},
-              color: Colors.green,
+              color: Colors.lightGreen.shade800,
               textColor: Colors.white,
-              child: Text("Get OTP", style: TextStyle(fontSize: 16),),
               height: 40,
               minWidth: double.infinity,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: const Text(
+                "Get OTP",
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
@@ -54,9 +55,63 @@ class LoginView extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: LoginView(),
-    debugShowCheckedModeBanner: false,
-  ));
+class PhoneNumberInput extends StatefulWidget {
+  const PhoneNumberInput({super.key});
+
+  @override
+  PhoneNumberInputState createState() => PhoneNumberInputState();
+}
+
+enum CountryCode {
+  INDIA("🇮🇳", "+91"),
+  USA("🇺🇸", "+1");
+
+  final String countryEmoji;
+  final String countryPhoneCode;
+
+  const CountryCode(this.countryEmoji, this.countryPhoneCode);
+}
+
+class PhoneNumberInputState extends State<PhoneNumberInput> {
+  CountryCode? selectedCountryCode;
+  String? phoneNumber;
+
+  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController countryCodeController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        DropdownMenu<String>(
+          initialSelection: CountryCode.INDIA.countryPhoneCode,
+          controller: countryCodeController,
+          label: const Text("Country"),
+          onSelected: (String? value) {
+            setState(() {
+              selectedCountryCode = CountryCode.values
+                  .firstWhere((country) => country.countryPhoneCode == value);
+            });
+          },
+          dropdownMenuEntries: CountryCode.values
+              .map((CountryCode country) => DropdownMenuEntry<String>(
+                    value: country.countryPhoneCode,
+                    label: country.countryEmoji,
+                  ))
+              .toList(),
+        ),
+        Expanded(
+          child: TextField(
+            keyboardType: TextInputType.phone,
+            controller: phoneNumberController,
+            onChanged: (String value) {
+              setState(() {
+                phoneNumber = value;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
