@@ -1,83 +1,75 @@
-import 'package:app/common/phone_number.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class PhoneNumberInput extends StatefulWidget {
   const PhoneNumberInput({super.key});
 
   @override
-  State<StatefulWidget> createState() => PhoneNumberInputState();
+  State<PhoneNumberInput> createState() => _PhoneNumberInputState();
 }
 
-class PhoneNumberInputState extends State<PhoneNumberInput> {
-  final String selectedCountryCode =
-      '+91'; // Replace with your default country code
-  late String phoneNumber;
+class _PhoneNumberInputState extends State<PhoneNumberInput> {
+  bool isFocused = false;
+  late FocusNode _focusNode;
 
-  final maskFormatter = MaskTextInputFormatter(
-    mask: '##### #####',
-    filter: {"#": RegExp(r'[0-9]')},
-  );
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
 
-  PhoneNumberInputState() {
-    phoneNumber = "";
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            "Mobile Number",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        IntrinsicHeight(
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.black26),
-                borderRadius: BorderRadius.circular(4)),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    selectedCountryCode,
-                    style: const TextStyle(color: Colors.black54, fontSize: 16),
-                  ),
+    return IntrinsicHeight(
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: isFocused ? Colors.grey.shade500 : Colors.grey.shade400,
+                width: 1.5),
+            borderRadius: BorderRadius.circular(Spacing.xs)),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(Spacing.sm),
+              child: Center(
+                child: Text(
+                  "+91",
+                  style: TextStyle(
+                      fontSize: FontSize.md, color: Colors.grey.shade600),
                 ),
-                const VerticalDivider(
-                  thickness: 1,
-                  color: Colors.black26,
-                  indent: Spacing.sm,
-                  endIndent: Spacing.sm,
-                ),
-                Expanded(
-                  child: TextField(
-                    inputFormatters: [maskFormatter],
-                    keyboardType: TextInputType.phone,
-                    maxLength: 11,
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: InputBorder.none, // Remove default border
-                      hintText: "XXXXX XXXXX",
-                      contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-                      counterText: '',
-                    ),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            VerticalDivider(
+                width: 6,
+                thickness: 1.2,
+                indent: Spacing.sm,
+                endIndent: Spacing.sm,
+                color: Colors.grey.shade400),
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+              child: TextField(
+                  focusNode: _focusNode,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    hintText: "XXXXX XXXXX",
+                    border: InputBorder.none,
+                  )),
+            ))
+          ],
         ),
-      ],
+      ),
     );
   }
 }

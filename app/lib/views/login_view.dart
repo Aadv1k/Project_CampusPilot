@@ -1,54 +1,53 @@
 import 'package:app/components/phone_number_input.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:app/utils/sizes.dart';
+import 'package:flutter/material.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: const Color.fromRGBO(255, 253, 248, 1),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(
-              vertical: Spacing.md, horizontal: Spacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const Column(children: [
-                Text(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.md, vertical: Spacing.xs),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset("assets/placeholder_logo.png", width: 100),
+                const SizedBox(height: Spacing.md),
+                const Text(
                   "Sign in",
-                  textAlign: TextAlign.start,
                   style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontSize: FontSize.lg, fontWeight: FontWeight.bold),
                 ),
-              ]),
-              Column(
-                children: [
-                  const PhoneNumberInput(),
-                  const SizedBox(height: Spacing.sm),
-                  MaterialButton(
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  "This app is currently in beta",
+                  style: TextStyle(
+                      fontSize: FontSize.md, color: Colors.grey.shade500),
+                ),
+                const SizedBox(height: Spacing.xl * 1.6),
+                const PhoneNumberInput(),
+                const SizedBox(height: Spacing.sm),
+                MaterialButton(
                     onPressed: () {},
-                    color: Colors.lightGreen.shade700,
-                    textColor: Colors.white,
-                    height: 52,
+                    height: 48,
                     minWidth: double.infinity,
+                    color: Colors.lightGreen.shade800,
+                    textColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Text(
-                      "Get OTP",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ],
-              )
-            ],
+                        borderRadius: BorderRadius.circular(Spacing.xs)),
+                    child: const Text("Verify",
+                        style: TextStyle(
+                            fontSize: FontSize.md,
+                            fontWeight: FontWeight.bold)))
+              ],
+            ),
           ),
         ),
       ),
