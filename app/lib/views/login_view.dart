@@ -44,7 +44,7 @@ class _LoginViewState extends State<LoginView> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md, vertical: Spacing.xs),
+                  horizontal: Spacing.md, vertical: Spacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,16 +75,16 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(height: Spacing.sm),
                   MaterialButton(
                       onPressed: _handleVerifyTap,
-                      height: 48,
+                      height: 54,
                       minWidth: double.infinity,
-                      color: Colors.lightGreen.shade800,
+                      color: Colors.lightGreen.shade700,
                       textColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Spacing.xs)),
+                          borderRadius: BorderRadius.circular(Spacing.sm)),
                       child: const Text("Verify",
                           style: TextStyle(
-                              fontSize: FontSize.md,
-                              fontWeight: FontWeight.bold)))
+                            fontSize: FontSize.md,
+                          )))
                 ],
               ),
             ),
