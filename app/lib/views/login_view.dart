@@ -1,9 +1,12 @@
 import 'package:app/common/phone_number.dart';
+import 'package:app/components/button.dart';
+import 'package:app/components/mailto_link.dart';
 import 'package:app/components/phone_number_input.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:app/views/otp_verify_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -44,23 +47,20 @@ class _LoginViewState extends State<LoginView> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md, vertical: Spacing.md),
+                  horizontal: Spacing.lg, vertical: Spacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/placeholder_logo.png", width: 100),
+                  SvgPicture.asset("assets/placeholder_logo.svg", width: 100),
                   const SizedBox(height: Spacing.md),
                   const Text(
-                    "Sign in",
+                    "Welcome to Your School's Communication Hub.",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: FontSize.lg, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: Spacing.xs),
-                  Text(
-                    "This app is currently in beta",
-                    style: TextStyle(
-                        fontSize: FontSize.md, color: Colors.grey.shade500),
+                        fontSize: FontSize.xxxl,
+                        height: 1,
+                        fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: Spacing.xl * 1.6),
                   PhoneNumberInput(
@@ -73,18 +73,20 @@ class _LoginViewState extends State<LoginView> {
                     errorMessage: errorMessage,
                   ),
                   const SizedBox(height: Spacing.sm),
-                  MaterialButton(
+                  PrimaryButton(
                       onPressed: _handleVerifyTap,
-                      height: 54,
-                      minWidth: double.infinity,
-                      color: Colors.lightGreen.shade700,
-                      textColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Spacing.sm)),
+                      width: double.infinity,
                       child: const Text("Verify",
                           style: TextStyle(
-                            fontSize: FontSize.md,
-                          )))
+                              fontSize: FontSize.md,
+                              fontWeight: FontWeight.bold))),
+                  MailtoLink(
+                      emailSubject:
+                          "Support request: Can't login ${_userLoginDetails.phoneNumber}",
+                      child: Text("Can't login? Contact support.",
+                          style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: FontSize.md)))
                 ],
               ),
             ),

@@ -7,13 +7,13 @@ class Spacing {
 }
 
 class FontSize {
-  static const double xs = 8.0; // Extra Small
-  static const double sm = 9.8; // Small
-  static const double md = 14.0; // Base (medium)
-  static const double lg = md * 1.618; // Large
-  static const double xl = lg * 1.618; // Extra Large
-  static const double xxl = xl * 1.618; // Extra Extra Large
-  static const double xxxl = xxl * 1.618; // Extra Extra Extra Large
+  static const double xs = 12.0; // Extra Small
+  static const double sm = 14.0; // Small
+  static const double md = 16.0; // Medium
+  static const double lg = 18.0; // Large
+  static const double xl = 20.0; // Extra Large
+  static const double xxl = 24.0; // Extra Extra Large
+  static const double xxxl = 30.0; // Extra Extra Extra Large
 }
 
 class Breakpoints {

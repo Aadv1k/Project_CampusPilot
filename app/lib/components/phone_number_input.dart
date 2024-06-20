@@ -64,26 +64,30 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
       children: [
         IntrinsicHeight(
           child: Container(
+            padding: const EdgeInsets.all(Spacing.sm),
             decoration: BoxDecoration(
+              color: Colors.grey.shade200,
               border: Border.all(
                 color: widget.hasError
                     ? (isFocused ? Colors.red.shade600 : Colors.red.shade500)
-                    : (isFocused ? Colors.grey.shade600 : Colors.grey.shade400),
+                    : (isFocused ? Colors.grey.shade300 : Colors.grey.shade200),
                 width: 1.8,
               ),
-              borderRadius: BorderRadius.circular(Spacing.xs),
+              borderRadius: BorderRadius.circular(Spacing.md),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(Spacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.sm, vertical: Spacing.md),
                   child: Center(
                     child: Text(
                       "+91",
                       style: TextStyle(
                         fontSize: FontSize.md,
-                        color: Colors.grey.shade600,
+                        color: Colors.grey.shade500,
                       ),
                     ),
                   ),
@@ -91,25 +95,28 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                 VerticalDivider(
                   width: 6,
                   thickness: 1.2,
-                  indent: Spacing.sm,
-                  endIndent: Spacing.sm,
-                  color:
-                      isFocused ? Colors.grey.shade700 : Colors.grey.shade400,
+                  indent: 12,
+                  endIndent: 12,
+                  color: Colors.grey.shade500,
                 ),
                 Expanded(
-                  child: Padding(
+                  child: Container(
+                    height: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                    child: TextField(
-                      focusNode: _focusNode,
-                      keyboardType: TextInputType.phone,
-                      controller: phoneNumberInputController,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(11),
-                        maskFormatter,
-                      ],
-                      decoration: const InputDecoration(
-                        hintText: "XXXXX XXXXX",
-                        border: InputBorder.none,
+                    child: Center(
+                      child: TextField(
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.phone,
+                        controller: phoneNumberInputController,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(11),
+                          maskFormatter,
+                        ],
+                        decoration: InputDecoration(
+                          hintText: "XXXXX XXXXX",
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                        ),
                       ),
                     ),
                   ),
@@ -119,10 +126,13 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
           ),
         ),
         widget.hasError
-            ? Text(
-                widget.errorMessage!,
-                style: TextStyle(
-                    color: Colors.red.shade500, fontSize: FontSize.md),
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                child: Text(
+                  widget.errorMessage!,
+                  style: TextStyle(
+                      color: Colors.red.shade500, fontSize: FontSize.sm),
+                ),
               )
             : const SizedBox.shrink(),
       ],
