@@ -12,8 +12,8 @@ class UserModel {
 }
 
 class UserLoginDetails {
-  final CountryCode phoneCountryCode;
-  final String phoneNumber;
+  CountryCode phoneCountryCode;
+  String phoneNumber;
 
-  const UserLoginDetails(this.phoneCountryCode, this.phoneNumber);
+  UserLoginDetails(this.phoneCountryCode, this.phoneNumber);
 }
