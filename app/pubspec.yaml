@@ -67,6 +67,10 @@ flutter:
     - assets/placeholder_logo.svg
     - assets/placeholder_logo.png
 
+    - assets/icon-plus.svg
+    - assets/icon-chevron-left.svg
+
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

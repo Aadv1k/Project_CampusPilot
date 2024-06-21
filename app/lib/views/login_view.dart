@@ -42,53 +42,56 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.lg, vertical: Spacing.md),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SvgPicture.asset("assets/placeholder_logo.svg", width: 100),
-                  const SizedBox(height: Spacing.md),
-                  const Text(
-                    "Welcome to Your School's Communication Hub.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: FontSize.xxxl,
-                        height: 1,
-                        fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: Spacing.xl * 1.6),
-                  PhoneNumberInput(
-                    onInput: (value) {
-                      setState(() {
-                        _userLoginDetails.phoneNumber = value;
-                      });
-                    },
-                    hasError: hasError,
-                    errorMessage: errorMessage,
-                  ),
-                  const SizedBox(height: Spacing.sm),
-                  PrimaryButton(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.xl, vertical: Spacing.xl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset("assets/placeholder_logo.svg",
+                    width: 50, height: 50),
+                const SizedBox(height: Spacing.xl * 1.6),
+                const Text(
+                  "Welcome to Your School's Communication Hub.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: FontSize.xxxl,
+                      height: 1,
+                      fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: Spacing.xl),
+                Column(
+                  children: [
+                    PhoneNumberInput(
+                      onInput: (value) {
+                        setState(() {
+                          _userLoginDetails.phoneNumber = value;
+                        });
+                      },
+                      hasError: hasError,
+                      errorMessage: errorMessage,
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    PrimaryButton(
                       onPressed: _handleVerifyTap,
                       width: double.infinity,
-                      child: const Text("Verify",
-                          style: TextStyle(
-                              fontSize: FontSize.md,
-                              fontWeight: FontWeight.bold))),
-                  MailtoLink(
-                      emailSubject:
-                          "Support request: Can't login ${_userLoginDetails.phoneNumber}",
-                      child: Text("Can't login? Contact support.",
-                          style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: FontSize.md)))
-                ],
-              ),
+                      text: "Sign in",
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    MailtoLink(
+                        emailSubject: "Support request: Can't login",
+                        emailBody:
+                            "Entered Number: ${_userLoginDetails.phoneNumber}\nErrors: ${hasError ? errorMessage : "None"}",
+                        child: Text("Can't login? Contact support.",
+                            style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: FontSize.md))),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

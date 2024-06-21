@@ -3,31 +3,36 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MailtoLink extends StatelessWidget {
   final String emailSubject;
+  final String emailBody;
   final Widget child;
 
   const MailtoLink({
     super.key,
     required this.emailSubject,
+    required this.emailBody,
     required this.child,
   });
 
-  void _launchEmail() {
+  void _launchEmail() async {
+    final String encodedSubject = Uri.encodeComponent(emailSubject);
+    final String encodedBody = Uri.encodeComponent(emailBody);
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'our.email@gmail.com',
-      queryParameters: {
-        'subject': 'CallOut user Profile',
-      },
+      path: 'aadvik.developer@gmail.com',
+      query: 'subject=$encodedSubject&body=$encodedBody',
     );
-    launchUrl(emailLaunchUri);
+
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    } else {
+      // Handle error
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {
-        _launchEmail();
-      },
+      onPressed: _launchEmail,
       style: TextButton.styleFrom(
         shadowColor: Colors.transparent,
         overlayColor: Colors.transparent,

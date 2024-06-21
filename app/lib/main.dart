@@ -1,3 +1,4 @@
+import 'package:app/views/otp_verify_view.dart';
 import 'package:flutter/material.dart';
 import 'package:app/views/login_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,8 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Project CampusPilot",
       theme: ThemeData(brightness: Brightness.light).copyWith(
-          textTheme: GoogleFonts.poppinsTextTheme(
-              ThemeData(brightness: Brightness.light).textTheme)),
+          textTheme: ThemeData(brightness: Brightness.light).textTheme),
       home: const LoginView(),
       debugShowCheckedModeBanner: false,
     );

@@ -66,7 +66,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
           child: Container(
             padding: const EdgeInsets.all(Spacing.sm),
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Colors.grey.shade100,
               border: Border.all(
                 color: widget.hasError
                     ? (isFocused ? Colors.red.shade600 : Colors.red.shade500)
