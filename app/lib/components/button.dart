@@ -1,36 +1,46 @@
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final double height;
-  final Color color;
   final double width;
   final String text;
+  final bool isLoading;
 
-  const PrimaryButton(
-      {super.key,
-      required this.width,
-      required this.text,
-      this.onPressed,
-      this.height = 72.0,
-      this.color = CustomPalette.black});
+  const PrimaryButton({
+    super.key,
+    required this.width,
+    required this.text,
+    this.onPressed,
+    this.height = 72.0,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
       height: height,
-      onPressed: onPressed,
+      color: CustomPalette.black,
+      disabledColor: Colors.black45,
+      onPressed: isLoading ? null : onPressed,
       disabledElevation: 0,
-      color: color,
       minWidth: width,
       textColor: Colors.white,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Spacing.md)),
-      child: Text(text,
-          style: const TextStyle(
-              fontSize: FontSize.md, fontWeight: FontWeight.bold)),
+      child: isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ))
+          : Text(text,
+              style: const TextStyle(
+                  fontSize: FontSize.md, fontWeight: FontWeight.bold)),
     );
   }
 }
