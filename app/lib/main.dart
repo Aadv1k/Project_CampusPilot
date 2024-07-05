@@ -14,9 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Project CampusPilot",
-      theme: ThemeData(brightness: Brightness.light).copyWith(
-          textTheme: ThemeData(brightness: Brightness.light).textTheme),
-      home: const LoginView(),
+      theme: ThemeData(brightness: Brightness.light)
+          .copyWith(textTheme: GoogleFonts.dmSansTextTheme()),
+      home: const OtpVerifyView(),
       debugShowCheckedModeBanner: false,
     );
   }

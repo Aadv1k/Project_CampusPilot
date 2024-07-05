@@ -1,3 +1,4 @@
+import 'package:app/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/services.dart';
@@ -66,7 +67,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
           child: Container(
             padding: const EdgeInsets.all(Spacing.sm),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Palette.gray200,
               border: Border.all(
                 color: widget.hasError
                     ? (isFocused ? Colors.red.shade600 : Colors.red.shade500)
@@ -82,23 +83,25 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: Spacing.sm, vertical: Spacing.md),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       "+91",
                       style: TextStyle(
                         fontSize: FontSize.md,
-                        color: Colors.grey.shade500,
+                        color: Palette.gray500,
                       ),
                     ),
                   ),
                 ),
-                VerticalDivider(
+                const SizedBox(width: Spacing.sm),
+                const VerticalDivider(
                   width: 6,
                   thickness: 1.2,
-                  indent: 12,
-                  endIndent: 12,
-                  color: Colors.grey.shade500,
+                  indent: 14,
+                  endIndent: 14,
+                  color: Palette.gray400,
                 ),
+                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Container(
                     height: double.infinity,
@@ -112,10 +115,12 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                           LengthLimitingTextInputFormatter(11),
                           maskFormatter,
                         ],
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: "XXXXX XXXXX",
                           border: InputBorder.none,
-                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          hintStyle: TextStyle(
+                            color: Palette.gray500,
+                            ),
                         ),
                       ),
                     ),

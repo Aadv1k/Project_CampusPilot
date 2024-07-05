@@ -47,9 +47,9 @@ class UserLoginService extends ChangeNotifier {
 
     var data = json.decode(res.body);
 
-    this.user.accessToken = data.get("access_token");
+    user.accessToken = data.get("access_token");
 
-    this.notifyListeners()
+    notifyListeners()
   }
 }
 

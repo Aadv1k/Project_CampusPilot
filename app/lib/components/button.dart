@@ -1,6 +1,5 @@
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -15,7 +14,7 @@ class PrimaryButton extends StatelessWidget {
     required this.width,
     required this.text,
     this.onPressed,
-    this.height = 72.0,
+    this.height = 84.0,
     this.isLoading = false,
   });
 
@@ -23,12 +22,12 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialButton(
       height: height,
-      color: CustomPalette.black,
+      color: Palette.primary,
       disabledColor: Colors.black45,
       onPressed: isLoading ? null : onPressed,
       disabledElevation: 0,
       minWidth: width,
-      textColor: Colors.white,
+      textColor: Palette.white,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Spacing.md)),
       child: isLoading
@@ -40,7 +39,9 @@ class PrimaryButton extends StatelessWidget {
               ))
           : Text(text,
               style: const TextStyle(
-                  fontSize: FontSize.md, fontWeight: FontWeight.bold)),
+                  fontSize: FontSize.md, fontWeight: FontWeight.bold,
+                  letterSpacing: 0.75
+                  )),
     );
   }
 }
@@ -58,8 +59,8 @@ class SquareIconButton extends StatelessWidget {
     required this.icon,
     this.onPressed,
     this.size = 48.0, // Default size
-    this.iconColor = Colors.grey, // Default icon color
-    this.backgroundColor = Colors.grey, // Default background color
+    this.iconColor = Palette.gray400, // Default icon color
+    this.backgroundColor = Palette.gray200, // Default background color
     this.borderRadius = 8.0, // Default border radius
   });
 
