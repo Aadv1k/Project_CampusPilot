@@ -8,9 +8,10 @@ class Heading extends StatelessWidget {
   final TextStyle? style;
 
   static const Map<int, Map<String, double>> sizes = {
-    3: {'fontSize': 16.0, 'lineHeight': 1.2},
-    2: {'fontSize': 24.0, 'lineHeight': 1.3},
-    1: {'fontSize': 32.0, 'lineHeight': 1.4},
+    1: {'fontSize': 32.0, 'lineHeight': 1.2}, 
+    2: {'fontSize': 24.0, 'lineHeight': 1.4},
+    3: {'fontSize': 20.0, 'lineHeight': 1.5},
+    4: {'fontSize': 18.0, 'lineHeight': 1.6}, 
   };
 
   const Heading({Key? key, required this.order, required this.text, this.style, this.textAlign}) : super(key: key);

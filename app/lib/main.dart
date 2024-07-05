@@ -1,3 +1,4 @@
+import 'package:app/views/announcement_list_view.dart';
 import 'package:app/views/otp_verify_view.dart';
 import 'package:flutter/material.dart';
 import 'package:app/views/login_view.dart';
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: "Project CampusPilot",
       theme: ThemeData(brightness: Brightness.light)
           .copyWith(textTheme: GoogleFonts.dmSansTextTheme()),
-      home: const OtpVerifyView(),
+      home: const AnnouncementListView(),
       debugShowCheckedModeBanner: false,
     );
   }
