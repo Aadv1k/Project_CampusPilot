@@ -69,6 +69,19 @@ class AnnouncementTests(TestCase):
             )
         )
 
+        for i in range(15):
+            ann = Announcement.objects.create(
+                announcer=self.user_with_permissions,
+                title=f"Announcement {i + 1}",
+                body=f"This is announcement number {i + 1}",
+            )
+
+            AnnouncementScope.objects.create(
+                announcement=ann,
+                scope_context=AnnouncementScope.ScopeContextChoices.all
+            )
+
+
     def test_user_without_permissions_cannot_read_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_without_perms)
         url = reverse("announcement_list", args=[self.school.id])
@@ -173,3 +186,18 @@ class AnnouncementTests(TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Announcement.objects.filter(id=announcement.id).exists())
 
+    def test_pagination(self):
+            self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token_with_perms)
+            url = reverse("announcement_list", args=[self.school.id])
+
+            # Request the first page
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data["results"]), 10)
+
+            next_page_url = response.data["next"]
+            self.assertIsNotNone(next_page_url)
+
+            response = self.client.get(next_page_url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data["results"]), 5)

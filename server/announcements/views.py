@@ -1,6 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, pagination, status
 from rest_framework.response import Response
-from rest_framework import status
 from users.permissions import (
     IsAuthenticated,
     IsMember,
@@ -27,12 +26,18 @@ class AnnouncementsViewset(viewsets.ViewSet):
     def list(self, request, school_id):
         current_user = request.user
         announcements = Announcement.objects.filter(announcer__school__id=school_id)
+
         filtered_announcements = []
         for announcement in announcements:
             if self.check_announcement_scope(announcement, current_user):
                 filtered_announcements.append(announcement)
-        serializer = AnnouncementSerializer(filtered_announcements, many=True)
-        return Response(serializer.data)
+
+        paginator = pagination.PageNumberPagination()
+        paginator.page_size = 10
+        result_page = paginator.paginate_queryset(filtered_announcements, request)
+
+        serializer = AnnouncementSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def create(self, request, school_id):
         data = copy.deepcopy(request.data)
@@ -72,7 +77,7 @@ class AnnouncementsViewset(viewsets.ViewSet):
 
     def check_announcement_scope(self, announcement, user):
         for scope in announcement.scope.all():
-            scope_type = scope.scope_type
+            scope_type = scope.scope_context
             filter_content = scope.filter_content
             if scope_type == "student":
                 if str(user.id) == filter_content:

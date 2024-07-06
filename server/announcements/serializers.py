@@ -72,10 +72,13 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
         exclude = ["announcement"]
 
 class AnnouncementSerializer(serializers.ModelSerializer):
-    scope = AnnouncementScopeSerializer(many=True)
+    scope = AnnouncementScopeSerializer(many=True, required=True)
+
+    def validate(self, attrs):
+        return super().validate(attrs)
 
     def validate_scope(self, scope_data):
-        if len(scope_data) == 0:
+        if not scope_data or len(scope_data) == 0:
             raise serializers.ValidationError("Announcements must have at least one scope")
 
         has_all_scope = False
