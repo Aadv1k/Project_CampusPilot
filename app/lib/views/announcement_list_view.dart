@@ -1,6 +1,7 @@
-import 'package:app/components/announcement.dart';
+import 'package:app/components/announcement_card.dart';
 import 'package:app/components/safe_scaffold.dart';
 import 'package:app/components/typography.dart';
+import 'package:app/models/announcement.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
@@ -12,17 +13,6 @@ class AnnouncementListView extends StatefulWidget {
   @override
   State<AnnouncementListView> createState() => _AnnouncementListViewState();
 }
-
-class Announcement {
-  String id;
-  String title;
-  String body;
-  String authorName;
-  String postedAt;
-
-  Announcement(this.id, this.title, this.body, this.authorName, this.postedAt);
-}
-
 
 
 List<Announcement> mockAnnouncementData = [
@@ -68,6 +58,35 @@ List<Announcement> mockAnnouncementData = [
     "Mrs. Patel",
     "2024-07-05T13:00:00.000Z",
   ),
+  Announcement(
+    "k45h9h99-4d8b-43e1-bc1f-6c6e3c3c5c5d",
+    "New Extracurricular Activities",
+    "New extracurricular activities, including music, dance, and painting classes, will begin from next month. Interested students, please enroll at the earliest.",
+    "Ms. Ananya",
+    "2024-07-06T15:00:00.000Z",
+  ),
+  Announcement(
+    "l56i0i00-5a9f-47c2-bf1e-7b7f4b4b6b6e",
+    "Upcoming Field Trip",
+    "A field trip to the local botanical garden is scheduled for July 15, 2024. Permission slips will be distributed shortly.",
+    "Mr. Varun",
+    "2024-07-07T09:00:00.000Z",
+  ),
+  Announcement(
+    "m67j1j11-6b0e-48d3-aa2d-8d8c5d5d7d7f",
+    "Summer Vacation Notice",
+    "Please note that the school will remain closed for summer vacation from July 30 to August 15, 2024. Classes will resume on August 16, 2024.",
+    "Mrs. Sharma",
+    "2024-07-07T10:00:00.000Z",
+  ),
+  Announcement(
+    "n78k2k22-7c1f-49b4-bd3c-9e9d6e6e8e8g",
+    "Community Service Project",
+    "Students are encouraged to participate in a community service project to clean up the local park on July 12, 2024. Volunteers please register at the school office.",
+    "Mr. Anand",
+    "2024-07-07T11:00:00.000Z",
+  ),
+
 ];
 
 
@@ -107,16 +126,31 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                 child: Column(
                   children: [
-                    TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search announcements...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        onChanged: _handleSearchInput,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+                      decoration: const BoxDecoration(
+                        color: Palette.gray200,
+                        borderRadius: BorderRadius.all(Radius.circular(16))
                       ),
-                      const SizedBox(height: Spacing.sm),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center, 
+                        children: [
+                          const Icon(Icons.search, color: Palette.gray400, size: 28),
+                          const SizedBox(width: Spacing.sm),
+                          Expanded(
+                            child: TextField(
+                                decoration: const InputDecoration(
+                                  hintText: 'Search announcements...',
+                                  hintStyle: TextStyle(color: Palette.gray400, fontSize: FontSize.md),
+                                  border: InputBorder.none
+                                ),
+                                onChanged: _handleSearchInput,
+                              ),
+                          ),
+                        ],
+                      ),
+                    ),
+                      const SizedBox(height: Spacing.md),
                   ],
                 ),
               ),
