@@ -3,7 +3,7 @@ from django.db import models
 from schools.models import School
 
 class User(models.Model):
-    class UserTypeChoices(models.TextChoices):
+    class UserType(models.TextChoices):
         student = "student", "Student",
         teacher = "teacher", "Teacher",
 
@@ -11,7 +11,7 @@ class User(models.Model):
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50)
-    user_type = models.CharField(max_length=10, choices=UserTypeChoices.choices)
+    user_type = models.CharField(max_length=10, choices=UserType.choices)
 
     def is_authenticated(self):
         return True

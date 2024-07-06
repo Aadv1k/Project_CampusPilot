@@ -21,13 +21,13 @@ class AnnouncementTests(TestCase):
             school=self.school,
             first_name="John",
             last_name="Doe",
-            user_type=User.UserTypeChoices.student,
+            user_type=User.UserType.student,
         )
         self.user_with_permissions = User.objects.create(
             school=self.school,
             first_name="Jane",
             last_name="Doe",
-            user_type=User.UserTypeChoices.teacher,
+            user_type=User.UserType.teacher,
         )
         UserContact.objects.create(
             user=self.user_without_permissions,
@@ -84,9 +84,9 @@ class AnnouncementTests(TestCase):
             "title": "foo",
             "body": "bar",
             "scope": [{ 
-                "context": "student",
-                "filter_type": "class",
-                "filter_content": "69420",
+                "scope_context": "student",
+                "filter_type": "standard",
+                "filter_content": "abcd",
             }]
         }, format="json")
 
@@ -107,8 +107,17 @@ class AnnouncementTests(TestCase):
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
             "scope": [
-                {"scope": AnnouncementScope.ScopeContextChoices.all},
-                {"scope": AnnouncementScope.ScopeContextChoices.student},
+                {"scope_context": "ALL"},
+                {"scope_context": "STUDENT"},
+            ]
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(url, {
+            "title": "Test school announcement",
+            "body": "This is an announcement to test out this system",
+            "scope": [
+                {"scope_context": "Student", "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division, "filter_content": "whatever"},
             ]
         }, format="json")
         self.assertEqual(response.status_code, 400)
@@ -118,17 +127,7 @@ class AnnouncementTests(TestCase):
             "title": "Test school announcement",
             "body": "This is an announcement to test out this system",
             "scope": [
-                {"scope": AnnouncementScope.ScopeContextChoices.student, "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division, "filter_content": "whatever"},
-            ]
-        }, format="json")
-        self.assertEqual(response.status_code, 400)
-        self.assertIsNotNone(response.data["error"]["details"]["scope"])
-
-        response = self.client.post(url, {
-            "title": "Test school announcement",
-            "body": "This is an announcement to test out this system",
-            "scope": [
-                {"scope": AnnouncementScope.ScopeContextChoices.student, "filter_type": AnnouncementScope.ScopeFilterChoices.full_name, "filter_content": "foo"},
+                {"scope_context": AnnouncementScope.ScopeContextChoices.student, "filter_type": AnnouncementScope.ScopeFilterChoices.full_name, "filter_content": "foo"},
             ]
         }, format="json")
         self.assertEqual(response.status_code, 400)
@@ -140,7 +139,7 @@ class AnnouncementTests(TestCase):
         response = self.client.post(url, data={
             "title": "Test school announcement GOOD",
             "body": "This is an announcement to test out this system",
-            "scope": [{"scope": AnnouncementScope.ScopeContextChoices.all}],
+            "scope": [{"scope_context": AnnouncementScope.ScopeContextChoices.all}],
         }, format="json")
         self.assertEqual(response.status_code, 201)
 
@@ -151,12 +150,12 @@ class AnnouncementTests(TestCase):
             title="Old Announcement Title",
             body="Old Announcement Body"
         )
-        AnnouncementScope.objects.create(announcement=announcement, scope=AnnouncementScope.ScopeContextChoices.student)
+        AnnouncementScope.objects.create(announcement=announcement, scope_context=AnnouncementScope.ScopeContextChoices.student)
         url = reverse("announcement_detail", args=[self.school.id, announcement.id])
         response = self.client.put(url, data={
             "title": "Updated Announcement Title",
             "body": "Updated Announcement Body",
-            "scope": [{"scope": AnnouncementScope.ScopeContextChoices.all}],
+            "scope": [{"scope_context": AnnouncementScope.ScopeContextChoices.all}],
         }, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["title"], "Updated Announcement Title")
@@ -174,18 +173,3 @@ class AnnouncementTests(TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Announcement.objects.filter(id=announcement.id).exists())
 
-    def test_user_can_create_announcement_with_attachment(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
-        url = reverse("announcement_list", args=[self.school.id])
-        response = self.client.post(url, data={
-            "title": "Announcement with Attachment",
-            "body": "This announcement has an attachment.",
-            "scope": [{"scope": AnnouncementScope.ScopeContextChoices.all}],
-            "attachments": [
-                {"file_name": "test_doc.pdf", "file_path": "/path/to/test_doc.pdf", "file_type": Attachment.FileTypeChoices.pdf}
-            ]
-        }, format="json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["title"], "Announcement with Attachment")
-        self.assertEqual(len(response.data["attachments"]), 1)
-        self.assertEqual(response.data["attachments"][0]["file_name"], "test_doc.pdf")

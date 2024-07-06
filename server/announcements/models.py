@@ -28,7 +28,7 @@ class AnnouncementScope(models.Model):
         department = "department", "Department"
 
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="scope")
-    scope = models.CharField(max_length=10, choices=ScopeContextChoices.choices)
+    scope_context = models.CharField(max_length=10, choices=ScopeContextChoices.choices)
     filter_type = models.CharField(max_length=20, choices=ScopeFilterChoices.choices, null=True)
     filter_content = models.CharField(max_length=255, null=True, blank=True)
 

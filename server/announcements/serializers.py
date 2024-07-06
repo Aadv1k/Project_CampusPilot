@@ -25,7 +25,7 @@ scope_validation_rules = [
     ScopeValidationRule(
         context=AnnouncementScope.ScopeContextChoices.student[0],
         filter_type=AnnouncementScope.ScopeFilterChoices.standard_division[0],
-        validator=lambda content: bool( # TODO: get rid of this code man
+        validator=lambda content: bool(
             std_div_pattern.match(content) and 
             len(std_div_pattern.findall(content)) == 1 and 
             Class.objects.filter(
@@ -37,120 +37,72 @@ scope_validation_rules = [
     ),
 ]
 
+# Custom field for lowercase conversion
+class LowercaseCharField(serializers.CharField):
+    def to_internal_value(self, data):
+        return super().to_internal_value(data).lower()
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
+    filter_content = LowercaseCharField(required=False, allow_blank=True)
+
+    def to_internal_value(self, data):
+        # This method is called before validation
+        if 'filter_content' in data:
+            data['filter_content'] = data['filter_content'].lower()
+        return super().to_internal_value(data)
+
     def validate(self, data):
+        context = data.get('context')
         filter_type = data.get('filter_type')
         filter_content = data.get('filter_content')
 
-        if filter_type == AnnouncementScope.ScopeFilterChoices.standard_division:
-            if not self.validate_standard_division(filter_content):
-                raise serializers.ValidationError("Invalid standard division filter content, expected [Std][Div]")
-        elif filter_type == AnnouncementScope.ScopeFilterChoices.standard:
-            if not self.validate_standard(filter_content):
-                raise serializers.ValidationError("Invalid standard filter content.")
-        elif filter_type == AnnouncementScope.ScopeFilterChoices.full_name:
-            if not self.validate_full_name(filter_content):
-                raise serializers.ValidationError("Invalid full name filter")
-        elif filter_type == None:
-            pass
-        else:
-            raise serializers.ValidationError(f"filter type {filter_type} not implemented!")
+        if not filter_type and not filter_content:
+            return data
+    
+        for rule in scope_validation_rules:
+            if rule.context == context and rule.filter_type == filter_type:
+                if not rule.validator(filter_content):  # No need to call .lower() here as it's already lowercase
+                    raise serializers.ValidationError(rule.message or f"Invalid filter content for {filter_type}")
+                return data
 
-        return data
-
-    def validate_full_name(self, value):
-        parts = value.split()
-        if len(parts) != 2:
-            raise serializers.ValidationError("Full name should contain at least two parts (first name and last name).")
-
-        first_name = parts[0]
-        last_name = ' '.join(parts[1:])
-
-        try:
-            user = User.objects.get(first_name__iexact=first_name, last_name__iexact=last_name)
-            return True
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User with this first and last name combination does not exist.")
-
-
-    def validate_standard(self, content):
-        try:
-            standard_value = int(content)
-            if standard_value < 1 or standard_value > 12:
-                return False
-            return True
-        except ValueError:
-            return False
-
-    def validate_standard_division(self, content):
-        pattern = r'^(\d{1,2})([A-Z])$'
-        return bool(re.match(pattern, content))
+        raise serializers.ValidationError(f"Filter {filter_type} does not exist under context {context}")
 
     class Meta:
         model = AnnouncementScope
-        fields = ['scope', 'filter_type', 'filter_content']
-
-class AttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attachment
-        fields = ['file_name', 'file_path', 'file_type']
+        exclude = ["announcement"]
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     scope = AnnouncementScopeSerializer(many=True)
-    attachments = AttachmentSerializer(many=True, required=False)
 
-    class Meta:
-        model = Announcement
-        fields = ["title", "body", "announcer", "scope", "attachments"]
-
-    def validate_scope(self, value):
-        if not value:
-            raise serializers.ValidationError("At least one scope is required.")
+    def validate_scope(self, scope_data):
+        if len(scope_data) == 0:
+            raise serializers.ValidationError("Announcements must have at least one scope")
 
         has_all_scope = False
-        for scope_item in value:
-            if scope_item["scope"] == AnnouncementScope.ScopeContextChoices.all:
+        for scope in scope_data:
+            if scope.get("scope_context") == AnnouncementScope.ScopeContextChoices.all:
                 has_all_scope = True
                 break
 
-        if has_all_scope and len(value) > 1:
+        if has_all_scope and len(scope_data) > 1:
             raise serializers.ValidationError("If 'all' scope is included, no other scopes can be set.")
+        
+        for scope in scope_data:
+            AnnouncementScopeSerializer(data=scope).is_valid(raise_exception=True)
 
-        return value
+        return scope_data
     
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['scope'] = AnnouncementScopeSerializer(instance.scope, many=True).data
-        representation['attachments'] = AttachmentSerializer(instance.attachments, many=True).data
-        return representation
-    
-    def to_internal_value(self, data):
-        internal_value = super().to_internal_value(data)
-        internal_value['scope'] = self.fields['scope'].to_internal_value(data.get('scope', []))
-        internal_value['attachments'] = self.fields['attachments'].to_internal_value(data.get('attachments', []))
-        return internal_value
-
     def create(self, validated_data):
-        scope = validated_data.get("scope")
-        attachments = validated_data.get("attachments", {})
-
         announcement = Announcement.objects.create(
-            announcer=validated_data["announcer"],
-            title=validated_data["title"],
-            body=validated_data["body"],
+            announcer = validated_data["announcer"],
+            title =  validated_data["title"],
+            body = validated_data["body"]
         )
 
-        for scope_item in scope:
+        for scope in validated_data["scope"]:
             AnnouncementScope.objects.create(
-                announcement=announcement,
-                **scope_item
-            )
-
-        for attachment in attachments:
-            Attachment.objects.create(
-                announcement=announcement,
-                **attachment
+                announcement = announcement,
+                **scope
             )
 
         return announcement
@@ -158,18 +110,16 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.body = validated_data.get('body', instance.body)
+
+        instance.scope.all().delete()
+
+        scopes_data = validated_data.pop('scope', [])
+        for scope_data in scopes_data:
+            AnnouncementScope.objects.create(announcement=instance, **scope_data)
+
         instance.save()
-
-        if 'scope' in validated_data:
-            scopes_data = validated_data.pop('scope')
-            instance.scope.all().delete()
-            for scope_item in scopes_data:
-                AnnouncementScope.objects.create(announcement=instance, **scope_item)
-
-        if 'attachments' in validated_data:
-            attachments_data = validated_data.pop('attachments')
-            instance.attachments.all().delete()
-            for attachment_item in attachments_data:
-                Attachment.objects.create(announcement=instance, **attachment_item)
-
         return instance
+
+    class Meta:
+        model = Announcement
+        fields = "__all__"

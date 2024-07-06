@@ -21,7 +21,7 @@ class UserTests(TestCase):
             school=school,
             first_name="Robin",
             last_name="Sharma",
-            user_type=User.UserTypeChoices.student,
+            user_type=User.UserType.student,
         )
         UserContact.objects.create(
             user=user,
