@@ -1,7 +1,42 @@
 from rest_framework import serializers
 from .models import Announcement, AnnouncementScope, Attachment
+from classes.models import Class 
 from users.models import User
 import re
+
+from typing import NamedTuple, Callable, Optional
+
+class ScopeValidationRule(NamedTuple):
+    context: str
+    filter_type: str
+    validator: Callable[[str], bool]
+    message: Optional[str] = None
+
+std_div_pattern = re.compile(r"\b\d{1,2}[a-zA-Z]\b") 
+
+scope_validation_rules = [
+    ScopeValidationRule(
+        context=AnnouncementScope.ScopeContextChoices.student[0],
+        filter_type=AnnouncementScope.ScopeFilterChoices.standard[0],
+        validator=lambda content: Class.objects.filter(standard=content).exists(),
+        message="The standard does not exist."
+    ),
+
+    ScopeValidationRule(
+        context=AnnouncementScope.ScopeContextChoices.student[0],
+        filter_type=AnnouncementScope.ScopeFilterChoices.standard_division[0],
+        validator=lambda content: bool( # TODO: get rid of this code man
+            std_div_pattern.match(content) and 
+            len(std_div_pattern.findall(content)) == 1 and 
+            Class.objects.filter(
+                standard=std_div_pattern.findall(content)[0][0], 
+                division=std_div_pattern.findall(content)[0][1]
+            ).exists()
+        ),
+        message="The standard and division combination does not exist."
+    ),
+]
+
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     def validate(self, data):

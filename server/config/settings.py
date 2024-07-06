@@ -95,6 +95,11 @@ TESTING = sys.argv[1:2] == ['test']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+REDIS = {
+    "host": "localhost",
+    "port": 6379
+}
+
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": ["users.authentication.JWTAuthentication",],
