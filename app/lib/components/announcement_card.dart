@@ -35,28 +35,29 @@ class AnnouncementCard extends StatelessWidget{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(authorName, style: const TextStyle( fontSize: FontSize.md, color: Palette.gray400)),
-                  const Text("3:30 pm", style: TextStyle( fontSize: FontSize.md, color: Palette.gray600)),
+                  Text(authorName, style: const TextStyle( fontSize: FontSize.sm, color: Palette.gray400)),
+                  const Text("3:30 pm", style: TextStyle( fontSize: FontSize.sm, color: Palette.gray500, fontWeight: FontWeight.bold)),
                 ],
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: Spacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Heading(
-                    order: 4,
-                    text: title,
+                  Text(
+                    title,
                     style: const TextStyle(
-                        color: Palette.gray900, fontWeight: FontWeight.bold),
+                        color: Palette.gray900, fontWeight: FontWeight.bold, fontSize: FontSize.md
+                        ),
                   ),
+                  const SizedBox(height: Spacing.xs),
                   Text(
                     sanitizedBody,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Palette.gray600,
-                      fontSize: FontSize.md
+                      fontSize: FontSize.base
                     )
                   )
                 ],

@@ -94,7 +94,7 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
               Text(
                 "We texted you a code. Please verify that",
                 style:
-                    TextStyle(fontSize: FontSize.md, color: Colors.grey.shade500),
+                    TextStyle(fontSize: FontSize.base, color: Colors.grey.shade500),
               ),
             ],
           ),
@@ -121,7 +121,7 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
                 filled: true,
                 fillColor: Palette.gray200,
                 textStyle: const TextStyle(
-                    fontSize: FontSize.md,
+                    fontSize: FontSize.base,
                     fontWeight: FontWeight.bold,
                     color: Palette.gray400),
                 enabled: !_otpLoading,
@@ -134,7 +134,7 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
                       ? "Didn't get the code?"
                       : "Resend in $_resendTimer",
                   style: TextStyle(
-                    fontSize: FontSize.md,
+                    fontSize: FontSize.base,
                     color: _resendButtonEnabled
                         ? Palette.gray400
                         : Palette.gray200,

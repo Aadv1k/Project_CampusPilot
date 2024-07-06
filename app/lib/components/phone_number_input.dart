@@ -87,7 +87,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                     child: Text(
                       "+91",
                       style: TextStyle(
-                        fontSize: FontSize.md,
+                        fontSize: FontSize.base,
                         color: Palette.gray500,
                       ),
                     ),

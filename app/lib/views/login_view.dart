@@ -80,7 +80,7 @@ class _LoginViewState extends State<LoginView> {
                   child: Text("Can't login? Contact support.",
                       style: const TextStyle(
                           color: Palette.gray400,
-                          fontSize: FontSize.md))),
+                          fontSize: FontSize.base))),
             ],
           ),
         ],

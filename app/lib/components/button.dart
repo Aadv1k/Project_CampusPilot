@@ -39,7 +39,7 @@ class PrimaryButton extends StatelessWidget {
               ))
           : Text(text,
               style: const TextStyle(
-                  fontSize: FontSize.md, fontWeight: FontWeight.bold,
+                  fontSize: FontSize.base, fontWeight: FontWeight.bold,
                   letterSpacing: 0.75
                   )),
     );

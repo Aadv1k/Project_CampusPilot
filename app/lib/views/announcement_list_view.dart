@@ -135,13 +135,13 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center, 
                         children: [
-                          const Icon(Icons.search, color: Palette.gray400, size: 28),
+                          const Icon(Icons.search, color: Palette.gray500, size: 28),
                           const SizedBox(width: Spacing.sm),
                           Expanded(
                             child: TextField(
                                 decoration: const InputDecoration(
                                   hintText: 'Search announcements...',
-                                  hintStyle: TextStyle(color: Palette.gray400, fontSize: FontSize.md),
+                                  hintStyle: TextStyle(color: Palette.gray500, fontSize: FontSize.base),
                                   border: InputBorder.none
                                 ),
                                 onChanged: _handleSearchInput,
