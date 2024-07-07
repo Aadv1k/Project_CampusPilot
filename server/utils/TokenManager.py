@@ -2,12 +2,10 @@ from typing import NamedTuple, List
 from datetime import datetime, timedelta, timezone
 import jwt
 from django.conf import settings
-from users.models import UserPermission
 
 class UserTokenPayload(NamedTuple):
     user_id: str
     user_name: str
-    user_permissions: List[str]
 
 class TokenManager:
     """
@@ -19,7 +17,7 @@ class TokenManager:
         """
         Create a JWT token with the given payload and expiration time.
 
-        :param payload: UserTokenPayload object containing user_id, user_name, and user_permissions.
+        :param payload: UserTokenPayload object containing user_id, user_name
         :param expiry_in_days: The number of days before the token expires.
         :return: A JWT token as a string.
         """
@@ -28,7 +26,6 @@ class TokenManager:
             "exp": now + timedelta(days=expiry_in_days),
             "user_id": payload.user_id,
             "user_name": payload.user_name,
-            "user_permissions": payload.user_permissions
         }
         token = jwt.encode(jwt_payload, settings.SECRET_KEY, algorithm='HS256')
         return token
@@ -55,11 +52,10 @@ class TokenManager:
         Decode the given JWT token to extract the payload.
 
         :param token: The JWT token to decode.
-        :return: A UserTokenPayload object containing user_id, user_name, and user_permissions.
+        :return: A UserTokenPayload object containing user_id, user_name
         """
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         return UserTokenPayload(
             user_id=payload["user_id"],
             user_name=payload["user_name"],
-            user_permissions=payload["user_permissions"]
         )

@@ -4,7 +4,10 @@ from classes.models import Class
 from users.models import User
 import re
 
+import utils.utils as utils
+
 from typing import NamedTuple, Callable, Optional
+
 
 class ScopeValidationRule(NamedTuple):
     context: str
@@ -12,28 +15,23 @@ class ScopeValidationRule(NamedTuple):
     validator: Callable[[str], bool]
     message: Optional[str] = None
 
-std_div_pattern = re.compile(r"\b\d{1,2}[a-zA-Z]\b") 
-
 scope_validation_rules = [
     ScopeValidationRule(
-        context=AnnouncementScope.ScopeContextChoices.student[0],
-        filter_type=AnnouncementScope.ScopeFilterChoices.standard[0],
-        validator=lambda content: Class.objects.filter(standard=content).exists(),
+        context=AnnouncementScope.ScopeContextChoices.student.value,
+        filter_type=AnnouncementScope.ScopeFilterChoices.standard.value,
+        validator=lambda content: content.isdigit() and Class.objects.filter(standard=content).exists(),
         message="The standard does not exist."
     ),
 
     ScopeValidationRule(
-        context=AnnouncementScope.ScopeContextChoices.student[0],
-        filter_type=AnnouncementScope.ScopeFilterChoices.standard_division[0],
-        validator=lambda content: bool(
-            std_div_pattern.match(content) and 
-            len(std_div_pattern.findall(content)) == 1 and 
+        context=AnnouncementScope.ScopeContextChoices.student.value,
+        filter_type=AnnouncementScope.ScopeFilterChoices.standard_division.value,
+        validator=lambda content: utils.is_std_div_valid(content) and 
             Class.objects.filter(
-                standard=std_div_pattern.findall(content)[0][0], 
-                division=std_div_pattern.findall(content)[0][1]
-            ).exists()
-        ),
-        message="The standard and division combination does not exist."
+                standard=utils.extract_std_div_from_str(content)[0], 
+                division=utils.extract_std_div_from_str(content)[1]
+            ).exists(),
+        message="Either the std-div format is invalid; or std / div doesn't exist."
     ),
 ]
 
@@ -46,13 +44,12 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter_content = LowercaseCharField(required=False, allow_blank=True)
 
     def to_internal_value(self, data):
-        # This method is called before validation
         if 'filter_content' in data:
             data['filter_content'] = data['filter_content'].lower()
         return super().to_internal_value(data)
 
     def validate(self, data):
-        context = data.get('context')
+        scope_context = data.get('scope_context')
         filter_type = data.get('filter_type')
         filter_content = data.get('filter_content')
 
@@ -60,12 +57,12 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
             return data
     
         for rule in scope_validation_rules:
-            if rule.context == context and rule.filter_type == filter_type:
+            if rule.context == scope_context and rule.filter_type == filter_type:
                 if not rule.validator(filter_content):  # No need to call .lower() here as it's already lowercase
                     raise serializers.ValidationError(rule.message or f"Invalid filter content for {filter_type}")
                 return data
 
-        raise serializers.ValidationError(f"Filter {filter_type} does not exist under context {context}")
+        raise serializers.ValidationError(f"Filter {filter_type} does not exist under context {scope_context}")
 
     class Meta:
         model = AnnouncementScope
@@ -82,9 +79,18 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Announcements must have at least one scope")
 
         has_all_scope = False
+        classroom_standards = []
         for scope in scope_data:
             if scope.get("scope_context") == AnnouncementScope.ScopeContextChoices.all:
                 has_all_scope = True
+                break
+
+            if scope.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard_division:
+                std, div = utils.extract_std_div_from_str(scope.get("filter_content"))
+                classroom_standards.append(std)
+
+            if scope.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard and scope.get("filter_content") in classroom_standards:
+                raise serializers.ValidationError("When a standard scope is provided, standard_division scopes can't be passed")
                 break
 
         if has_all_scope and len(scope_data) > 1:

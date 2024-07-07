@@ -2,6 +2,8 @@ from django.db import models
 
 from users.models import User
 
+import utils.utils as utils
+
 class Announcement(models.Model):
     announcer = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -9,6 +11,26 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+    def user_in_scope(self, user: User) -> bool:
+        for scope in self.scope:
+            if scope.scope_context == AnnouncementScope.ScopeContextChoices.teacher and user.user_type == User.UserType.teacher:
+                assert("Teacher Scope logic not implemented")
+
+            # TODO: this needs to change massively
+            if scope.scope_context == AnnouncementScope.ScopeContextChoices.student and user.user_type == User.UserType.student:
+                if scope.filter_type == AnnouncementScope.ScopeFilterChoices.standard:
+                    if user.student_class.classroom.standard == scope.filter_content:
+                        return True 
+                if scope.filter_type == AnnouncementScope.ScopeFilterChoices.standard_division:
+                    # NOTE: this is validated during serialization
+                    std, div = utils.extract_std_div_from_str(scope.filter_content)
+                    if user.student_class.classroom.standard == std and user.student_class.classroom.division == div:
+                        return True 
+
+            # standard, standard_division
+
+        return False
 
     class Meta:
         verbose_name = "Announcement"

@@ -3,12 +3,12 @@ from rest_framework.response import Response
 from users.permissions import (
     IsAuthenticated,
     IsMember,
-    ReadAnnouncement,
-    ReadWriteAnnouncement,
+    ModifyAnnouncement,
 )
 from .serializers import AnnouncementSerializer
-from api.exceptions import HTTPSerializerBadRequest
+from api.exceptions import HTTPSerializerBadRequest, HTTPForbidden
 from .models import Announcement, AnnouncementScope
+from users.models import User
 
 import copy
 
@@ -17,10 +17,8 @@ class AnnouncementsViewset(viewsets.ViewSet):
 
     def get_permissions(self):
         permission_classes = self.permission_classes
-        if self.action == "list" or self.action == "retrieve":
-            permission_classes += [ReadAnnouncement]
-        elif self.action == "create" or self.action == "destroy":
-            permission_classes += [ReadWriteAnnouncement]
+        if self.action == "create" or self.action == "destroy":
+            permission_classes += [ModifyAnnouncement]
         return [permission() for permission in permission_classes]
 
     def list(self, request, school_id):
@@ -70,10 +68,14 @@ class AnnouncementsViewset(viewsets.ViewSet):
     def destroy(self, request, pk, school_id):
         try:
             announcement = Announcement.objects.get(id=pk)
-            announcement.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
         except Announcement.DoesNotExist:
             raise HTTPSerializerBadRequest(details={"message": f"Announcement with id {pk} does not exist."})
+
+        if announcement.announcer != request.user and not request.user.user_type == User.UserType.admin:
+            raise HTTPForbidden(message="The announcement you are trying to delete does not belong to you", details={"message": f"id {pk}"})
+
+        announcement.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def check_announcement_scope(self, announcement, user):
         for scope in announcement.scope.all():

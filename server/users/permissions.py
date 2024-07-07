@@ -4,7 +4,7 @@ from django.conf import settings
 import jwt
 from django.shortcuts import get_object_or_404
 from schools.models import School
-from .models import User, UserPermission
+from .models import User
 
 def extract_auth_header_from_request(request):
     auth = get_authorization_header(request).split()
@@ -46,18 +46,10 @@ class IsMember(permissions.BasePermission):
     def has_object_permission(self, request, view, school):
         return User.objects.filter(id=request.user.id, school=school).exists()
 
-class ReadAnnouncement(permissions.BasePermission):
-    """
-    Permission to allow read access to announcements.
-    """
-
-    def has_permission(self, request, view):
-        return request.user.permissions.filter(type=UserPermission.UserPermissionChoices.read_announcements).exists()
-
-class ReadWriteAnnouncement(permissions.BasePermission):
+class ModifyAnnouncement(permissions.BasePermission):
     """
     Permission to allow read and write access to announcements.
     """
 
     def has_permission(self, request, view):
-        return request.user.permissions.filter(type=UserPermission.UserPermissionChoices.write_announcements).exists()
+        return request.user.user_type in { User.UserType.teacher, User.UserType.admin }

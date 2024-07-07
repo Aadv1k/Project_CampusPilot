@@ -17,51 +17,66 @@ class AnnouncementTests(TestCase):
             name="Jethalal Public School",
             email="contact@jethalal.edu",
         )
-        self.user_without_permissions = User.objects.create(
+        self.student_without_permissions = User.objects.create(
             school=self.school,
             first_name="John",
             last_name="Doe",
             user_type=User.UserType.student,
         )
-        self.user_with_permissions = User.objects.create(
+        self.student_readonly_permissions = User.objects.create(
+            school=self.school,
+            first_name="Ravi",
+            last_name="Shankar",
+            user_type=User.UserType.student,
+        )
+        UserPermission.objects.create(
+            user=self.student_readonly_permissions,
+            type=UserPermission.UserPermissionChoices.read_announcements
+        )
+        self.student_token_readonly = TokenManager.create_token(
+            UserTokenPayload(user_id=self.student_readonly_permissions.id, user_name=self.student_readonly_permissions.first_name, 
+                            user_permissions=[ UserPermission.UserPermissionChoices.read_announcements, ])
+        )
+
+        self.teacher_with_permissions = User.objects.create(
             school=self.school,
             first_name="Jane",
             last_name="Doe",
             user_type=User.UserType.teacher,
         )
         UserContact.objects.create(
-            user=self.user_without_permissions,
+            user=self.student_without_permissions,
             country_code=MOCK_COUNTRY_CODE,
             phone_number=MOCK_PHONE,
             email="john.doe@example.com",
             relation_type=UserContact.RelationTypeChoices.PRIMARY,
         )
         UserContact.objects.create(
-            user=self.user_with_permissions,
+            user=self.teacher_with_permissions,
             country_code=MOCK_COUNTRY_CODE,
             phone_number="0987654321",
             email="jane.doe@example.com",
             relation_type=UserContact.RelationTypeChoices.PRIMARY,
         )
         UserPermission.objects.create(
-            user=self.user_with_permissions,
+            user=self.teacher_with_permissions,
             type=UserPermission.UserPermissionChoices.read_announcements
         )
         UserPermission.objects.create(
-            user=self.user_with_permissions,
+            user=self.teacher_with_permissions,
             type=UserPermission.UserPermissionChoices.write_announcements
         )
         self.token_without_perms = TokenManager.create_token(
             UserTokenPayload(
-                user_id=str(self.user_without_permissions.id),
-                user_name=self.user_without_permissions.first_name,
+                user_id=str(self.student_without_permissions.id),
+                user_name=self.student_without_permissions.first_name,
                 user_permissions=[]
             )
         )
         self.token_with_perms = TokenManager.create_token(
             UserTokenPayload(
-                user_id=str(self.user_with_permissions.id),
-                user_name=self.user_with_permissions.first_name,
+                user_id=str(self.teacher_with_permissions.id),
+                user_name=self.teacher_with_permissions.first_name,
                 user_permissions=[
                     UserPermission.UserPermissionChoices.read_announcements,
                     UserPermission.UserPermissionChoices.write_announcements
@@ -71,7 +86,7 @@ class AnnouncementTests(TestCase):
 
         for i in range(15):
             ann = Announcement.objects.create(
-                announcer=self.user_with_permissions,
+                announcer=self.teacher_with_permissions,
                 title=f"Announcement {i + 1}",
                 body=f"This is announcement number {i + 1}",
             )
@@ -81,6 +96,18 @@ class AnnouncementTests(TestCase):
                 scope_context=AnnouncementScope.ScopeContextChoices.all
             )
 
+
+            announcement_only_for_teachers = Announcement.objects.create(
+                announcer=self.teacher_with_permissions,
+                title=f"VERY IMPORTANT",
+                body=f"This announcement is only for teachers!",
+            )
+
+            AnnouncementScope.objects.create(
+                announcement=announcement_only_for_teachers,
+                scope_context=AnnouncementScope.ScopeContextChoices.teacher
+            )
+        
 
     def test_user_without_permissions_cannot_read_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_without_perms)
@@ -159,7 +186,7 @@ class AnnouncementTests(TestCase):
     def test_user_can_update_their_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
         announcement = Announcement.objects.create(
-            announcer=self.user_with_permissions,
+            announcer=self.teacher_with_permissions,
             title="Old Announcement Title",
             body="Old Announcement Body"
         )
@@ -177,7 +204,7 @@ class AnnouncementTests(TestCase):
     def test_user_can_delete_their_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token_with_perms)
         announcement = Announcement.objects.create(
-            announcer=self.user_with_permissions,
+            announcer=self.teacher_with_permissions,
             title="Announcement to Delete",
             body="This announcement will be deleted."
         )
@@ -201,3 +228,11 @@ class AnnouncementTests(TestCase):
             response = self.client.get(next_page_url)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.data["results"]), 5)
+
+    def test_student_should_not_see_announcement_for_teachers(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.student_token_readonly)
+        url = reverse("announcement_list", args=[self.school.id])
+
+        response = self.client.get(url)
+        print(self.teacher_with_permissions.permissions)
+        self.assertEqual(response.status_code, 200)

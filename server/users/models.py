@@ -1,11 +1,13 @@
 from django.db import models
 
 from schools.models import School
+from classes.models import Class
 
 class User(models.Model):
     class UserType(models.TextChoices):
         student = "student", "Student",
         teacher = "teacher", "Teacher",
+        admin = "admin", "Admin",
 
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
@@ -23,23 +25,6 @@ class User(models.Model):
         verbose_name = "User"
         verbose_name_plural = "Users"
         ordering = ['last_name', 'first_name']
-
-class UserPermission(models.Model):
-    class UserPermissionChoices(models.TextChoices):
-        read_announcements = 'read_announcements', 'Read Announcements'
-        write_announcements = 'write_announcements', 'Write Announcements'
-        write_users = 'write_users', 'Write Users'
-        read_users  = 'read_users', 'Read Users'
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="permissions")
-    type = models.CharField(max_length=20, choices=UserPermissionChoices.choices)
-
-    def __str__(self):
-        return f"{self.user.first_name} - {self.type}"
-
-    class Meta:
-        verbose_name = "User Permission"
-        verbose_name_plural = "User Permissions"
 
 class UserContact(models.Model):
     class RelationTypeChoices(models.TextChoices):
@@ -68,9 +53,8 @@ class UserContact(models.Model):
 
 
 class StudentDetail(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-   # Add specific fields related to student details as requirements come
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_detail")
+    student_class = models.ForeignKey(Class, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = "Student Detail"
@@ -78,9 +62,8 @@ class StudentDetail(models.Model):
 
 
 class TeacherDetail(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    # Add specific fields related to teacher details as requirements come
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_detail")
+    teacher_classes = models.ManyToManyField(Class)
 
     class Meta:
         verbose_name = "Teacher Detail"
