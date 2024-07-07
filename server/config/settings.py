@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "corsheaders",
+    "django_rq",
 
     "api",
     "schools",
@@ -97,16 +98,27 @@ TESTING = sys.argv[1:2] == ['test']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-REDIS = {
-    "host": "localhost",
-    "port": 6379
-}
-
 load_dotenv()
  
 TWILIO_SID=os.getenv("TWILIO_SID")
 TWILIO_AUTH_TOKEN=os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_FROM_NUMBER=os.getenv("TWILIO_FROM_NUMBER")
+
+REDIS_HOST=os.getenv("REDIS_HOST")
+REDIS_PORT=os.getenv("REDIS_PORT")
+REDIS_DB=os.getenv("REDIS_DB")
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': REDIS_HOST,
+        'PORT': REDIS_PORT,
+        'DB': REDIS_DB,
+        # 'USERNAME': 'some-user',
+        # 'PASSWORD': 'some-password',
+        # 'DEFAULT_TIMEOUT': 360,
+        # 'REDIS_CLIENT_KWARGS': { 'ssl_cert_reqs': None, },
+    },
+}
 
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",

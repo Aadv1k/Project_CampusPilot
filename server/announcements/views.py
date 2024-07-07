@@ -10,6 +10,8 @@ from api.exceptions import HTTPSerializerBadRequest, HTTPForbidden
 from .models import Announcement, AnnouncementScope
 from users.models import User
 
+from utils.AnnouncementQueue import ann_queue
+
 import copy
 
 class AnnouncementsViewset(viewsets.ViewSet):
@@ -42,7 +44,10 @@ class AnnouncementsViewset(viewsets.ViewSet):
         data["announcer"] = request.user.id
         serializer = AnnouncementSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            ann = serializer.save()
+
+            ann_queue.queue_announcement(ann.id)
+
             return Response(
                 serializer.data, 
                 status=status.HTTP_201_CREATED

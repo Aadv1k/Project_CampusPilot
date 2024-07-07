@@ -7,7 +7,7 @@ from django.conf import settings
 class RedisStore:
     _instance = None
 
-    def __new__(cls, host=settings.REDIS["host"], port=settings.REDIS["port"], db=0):
+    def __new__(cls, host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.redis_client = redis.StrictRedis(host=host, port=port, db=db)

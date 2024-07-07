@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
+import django_rq
 from django.core.management import call_command
 
 from rest_framework.test import APIClient
@@ -13,6 +14,9 @@ from announcements.models import AnnouncementScope
 from announcements.serializers import AnnouncementSerializer
 
 from utils.TokenManager import TokenManager, UserTokenPayload
+from utils.AnnouncementQueue import ann_queue, AnnouncementQueue
+
+ann_queue = AnnouncementQueue()
 
 class AnnouncementCRUDTests(TestCase):
     def setUp(self):
@@ -140,6 +144,45 @@ class AnnouncementCRUDTests(TestCase):
 
         self.assertEqual(res.status_code, 201)
         
+
+    # def test_announcement_queuing(self):
+    #     ann_queue.clear()
+
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_token)
+    #     url = reverse("announcement_list", args=[self.school.id])
+    #     res = self.client.post(url, { 
+    #         "title": "Good announcement example",
+    #         "body": "this is an example of good announcement",
+    #         "scope": [
+    #             {
+    #                 "scope_context": AnnouncementScope.ScopeContextChoices.student,
+    #                 "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division,
+    #                 "filter_content": "10A"
+    #             },
+    #          ]
+    #     }, format="json")
+
+    #     self.assertEqual(ann_queue.count(), 1)
+
+    # def test_queued_announcment_is_processed_properly(self):
+    #     ann_queue.clear()
+
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_token)
+    #     url = reverse("announcement_list", args=[self.school.id])
+    #     res = self.client.post(url, { 
+    #         "title": "Good announcement example",
+    #         "body": "this is an example of good announcement",
+    #         "scope": [
+    #             {
+    #                 "scope_context": AnnouncementScope.ScopeContextChoices.student,
+    #                 "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division,
+    #                 "filter_content": "10A"
+    #             },
+    #          ]
+    #     }, format="json")
+
+    #     ann_queue.process_announcement()
+    #     self.assertEqual(ann_queue.count(), 0)
 
     def test_teacher_can_update_their_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_token)
