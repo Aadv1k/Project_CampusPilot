@@ -43,6 +43,10 @@ class HTTPForbidden(HTTPException):
     def __init__(self, message, details=None):
         super().__init__(403, message, details)
 
+class HTTPInternalError(HTTPException):
+    def __init__(self, message, details=None):
+        super().__init__(500, message, details)
+
 class HTTPSerializerBadRequest(HTTPException):
     """
     Exception for 400 Bad Request errors specific to serializers.

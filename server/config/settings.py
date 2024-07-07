@@ -1,11 +1,13 @@
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
 
 import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-+aj23+4kbt-d5q+=1v$mkejj9x&m966rqdbiti(yqe(ykk--ek"
 DEBUG = True
-ALLOWED_HOSTS = []
 
 ROOT_URLCONF = "config.urls"
 
@@ -99,6 +101,12 @@ REDIS = {
     "host": "localhost",
     "port": 6379
 }
+
+load_dotenv()
+ 
+TWILIO_SID=os.getenv("TWILIO_SID")
+TWILIO_AUTH_TOKEN=os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_FROM_NUMBER=os.getenv("TWILIO_FROM_NUMBER")
 
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",
