@@ -1,7 +1,7 @@
 from rest_framework.test import APIRequestFactory
 from django.test import TestCase
 from schools.models import School 
-from users.models import User, UserPermission, UserContact
+from users.models import User, UserContact
 from utils.OTPManager import otp_manager
 from utils.TokenManager import TokenManager, UserTokenPayload
 from rest_framework.test import APIClient
@@ -30,8 +30,6 @@ class UserTests(TestCase):
             email="foo@example.org",
             relation_type=UserContact.RelationTypeChoices.PRIMARY,
         )
-        UserPermission.objects.create(user=user, type=UserPermission.UserPermissionChoices.read_announcements) 
-        UserPermission.objects.create(user=user, type=UserPermission.UserPermissionChoices.write_announcements) 
         self.user = user
 
     def test_user_bad_login(self):
@@ -72,4 +70,3 @@ class UserTests(TestCase):
         self.assertIsNotNone(response.data.get("access_token"))
         payload = TokenManager.decode_token(response.data.get("access_token"))
         self.assertEqual(payload.user_name, "Robin Sharma")
-        self.assertIn(UserPermission.UserPermissionChoices.read_announcements, payload.user_permissions)

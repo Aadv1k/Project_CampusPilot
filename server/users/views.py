@@ -54,7 +54,6 @@ def user_verify(request):
         UserTokenPayload(
             user_id=user.id, 
             user_name=f"{user.first_name} {user.last_name}", 
-            user_permissions= [perm.type for perm in user.permissions.all()]
             )
         )
 
