@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from django.core.management import call_command
+
 from rest_framework.test import APIClient
 
 from users.models import User
@@ -14,6 +16,8 @@ from utils.TokenManager import TokenManager, UserTokenPayload
 
 class AnnouncementCRUDTests(TestCase):
     def setUp(self):
+        call_command("loaddata", "initial_classes")
+
         self.client = APIClient()
         self.school = School.objects.create(
             name="Jethalal Public School",
@@ -21,21 +25,6 @@ class AnnouncementCRUDTests(TestCase):
             email="contact@jethalal.edu",
             website_url="http://www.jethalal.edu",
             logo_url="http://www.jethalal.edu/logo.png"
-        )
-
-        Class.objects.create(
-            school=self.school,
-            standard=10, division="A"
-        )
-
-        Class.objects.create(
-            school=self.school,
-            standard=10, division="B"
-        )
-
-        Class.objects.create(
-            school=self.school,
-            standard=10, division="C"
         )
 
         self.student = User.objects.create(
@@ -144,7 +133,7 @@ class AnnouncementCRUDTests(TestCase):
                 {
                     "scope_context": AnnouncementScope.ScopeContextChoices.student,
                     "filter_type": AnnouncementScope.ScopeFilterChoices.standard_division,
-                    "filter_content": "10a"
+                    "filter_content": "10A"
                 },
              ]
         }, format="json")

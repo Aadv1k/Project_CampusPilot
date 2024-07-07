@@ -2,7 +2,6 @@ from django.db import models
 from schools.models import School
 
 class Class(models.Model):
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
     standard = models.PositiveIntegerField()
     division = models.CharField(max_length=1)
 
@@ -14,5 +13,5 @@ class Class(models.Model):
         return f"Class {self.standard} - {self.division}"
 
     class Meta:
-        unique_together = ["school", "standard", "division"]
+        unique_together = ["standard", "division"]
         verbose_name_plural = "Classrooms"

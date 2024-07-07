@@ -1,0 +1,226 @@
+[
+  {
+    "model": "classes.class",
+    "pk": 1,
+    "fields": {
+      "standard": 6,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 2,
+    "fields": {
+      "standard": 6,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 3,
+    "fields": {
+      "standard": 6,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 4,
+    "fields": {
+      "standard": 6,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 5,
+    "fields": {
+      "standard": 7,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 6,
+    "fields": {
+      "standard": 7,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 7,
+    "fields": {
+      "standard": 7,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 8,
+    "fields": {
+      "standard": 7,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 9,
+    "fields": {
+      "standard": 8,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 10,
+    "fields": {
+      "standard": 8,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 11,
+    "fields": {
+      "standard": 8,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 12,
+    "fields": {
+      "standard": 8,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 13,
+    "fields": {
+      "standard": 9,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 14,
+    "fields": {
+      "standard": 9,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 15,
+    "fields": {
+      "standard": 9,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 16,
+    "fields": {
+      "standard": 9,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 17,
+    "fields": {
+      "standard": 10,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 18,
+    "fields": {
+      "standard": 10,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 19,
+    "fields": {
+      "standard": 10,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 20,
+    "fields": {
+      "standard": 10,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 21,
+    "fields": {
+      "standard": 11,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 22,
+    "fields": {
+      "standard": 11,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 23,
+    "fields": {
+      "standard": 11,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 24,
+    "fields": {
+      "standard": 11,
+      "division": "d"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 25,
+    "fields": {
+      "standard": 12,
+      "division": "a"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 26,
+    "fields": {
+      "standard": 12,
+      "division": "b"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 27,
+    "fields": {
+      "standard": 12,
+      "division": "c"
+    }
+  },
+  {
+    "model": "classes.class",
+    "pk": 28,
+    "fields": {
+      "standard": 12,
+      "division": "d"
+    }
+  }
+]
