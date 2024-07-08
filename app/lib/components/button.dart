@@ -14,7 +14,7 @@ class PrimaryButton extends StatelessWidget {
     required this.width,
     required this.text,
     this.onPressed,
-    this.height = 84.0,
+    this.height = 72.0,
     this.isLoading = false,
   });
 
@@ -39,9 +39,9 @@ class PrimaryButton extends StatelessWidget {
               ))
           : Text(text,
               style: const TextStyle(
-                  fontSize: FontSize.base, fontWeight: FontWeight.bold,
-                  letterSpacing: 0.75
-                  )),
+                  fontSize: FontSize.base,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.75)),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:app/components/safe_scaffold.dart';
 import 'package:app/components/typography.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
+import 'package:app/views/announcement_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -29,17 +30,17 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
       hasError = false;
     });
 
-    // Simulate an API call
     Future.delayed(const Duration(seconds: 2), () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AnnouncementListView()),
+      );
       setState(() {
         _otpLoading = false;
-        hasError = true;
-        errorMessage =
-            "Unable to send OTP due to internal error, please try again later";
+        // hasError = true;
+        // errorMessage =
+        //     "Unable to send OTP due to internal error, please try again later";
       });
-
-      // Handle successful OTP submission here
-      // For example, navigate to another screen
     });
   }
 
@@ -88,13 +89,15 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
                 size: 48,
               ),
               const SizedBox(height: Spacing.md),
-              const Heading(order: 2, text: "Verify your OTP",
-               style: TextStyle(fontWeight: FontWeight.bold)),
+              const Heading(
+                  order: 2,
+                  text: "Verify your OTP",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: Spacing.xs),
               Text(
                 "We texted you a code. Please verify that",
-                style:
-                    TextStyle(fontSize: FontSize.base, color: Colors.grey.shade500),
+                style: TextStyle(
+                    fontSize: FontSize.base, color: Colors.grey.shade500),
               ),
             ],
           ),
@@ -143,25 +146,25 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
               ),
             ],
           ),
-
-          Column(children: [
-          PrimaryButton(
-            width: double.infinity,
-            text: "Verify",
-            onPressed: () => _handleOtpSubmit(_otp),
-            isLoading: _otpLoading,
-          ),
-          if (hasError)
-            const SizedBox(height: Spacing.sm),
-            Text(
-              errorMessage ?? "",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: FontSize.sm,
+          Column(
+            children: [
+              PrimaryButton(
+                width: double.infinity,
+                text: "Verify",
+                onPressed: () => _handleOtpSubmit(_otp),
+                isLoading: _otpLoading,
               ),
-            ),
-          ],)
+              if (hasError) const SizedBox(height: Spacing.sm),
+              Text(
+                errorMessage ?? "",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: FontSize.sm,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

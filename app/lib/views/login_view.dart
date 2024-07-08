@@ -9,6 +9,7 @@ import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:app/views/otp_verify_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -43,47 +44,57 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeScaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Heading(
-            text: "Welcome to Your School's Communication Hub.",
-            textAlign: TextAlign.center,
-            order: 1,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: Spacing.xl),
-          Column(
-            children: [
-              PhoneNumberInput(
-                onInput: (value) {
-                  setState(() {
-                    _userLoginDetails.phoneNumber = value;
-                  });
-                },
-                hasError: hasError,
-                errorMessage: errorMessage,
-              ),
-              const SizedBox(height: Spacing.sm),
-              PrimaryButton(
-                onPressed: _handleVerifyTap,
-                width: double.infinity,
-                text: "Sign in",
-              ),
-              const SizedBox(height: Spacing.sm),
-              MailtoLink(
-                  emailSubject: "Support request: Can't login",
-                  emailBody:
-                      "Entered Number: ${_userLoginDetails.phoneNumber}\nErrors: ${hasError ? errorMessage : "None"}",
-                  child: Text("Can't login? Contact support.",
-                      style: const TextStyle(
-                          color: Palette.gray400,
-                          fontSize: FontSize.base))),
-            ],
-          ),
-        ],
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.only(
+            top: Spacing.xxl,
+            left: Spacing.lg,
+            right: Spacing.lg,
+            bottom: Spacing.md),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Column(
+              children: [
+                SizedBox(height: Spacing.lg),
+                Text(
+                  "Stay informed, engaged, and connected with your school",
+                  style: TextStyle(
+                      fontSize: FontSize.xl, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                PhoneNumberInput(
+                  onInput: (value) {
+                    setState(() {
+                      _userLoginDetails.phoneNumber = value;
+                    });
+                  },
+                  hasError: hasError,
+                  errorMessage: errorMessage,
+                ),
+                const SizedBox(height: Spacing.sm),
+                PrimaryButton(
+                  onPressed: _handleVerifyTap,
+                  width: double.infinity,
+                  text: "Sign in",
+                ),
+                const SizedBox(height: Spacing.xs),
+                MailtoLink(
+                    emailSubject: "Support request: Can't login",
+                    emailBody:
+                        "Entered Number: ${_userLoginDetails.phoneNumber}\nErrors: ${hasError ? errorMessage : "None"}",
+                    child: Text("Can't login? Contact support.",
+                        style: const TextStyle(
+                            color: Palette.gray400, fontSize: FontSize.base))),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

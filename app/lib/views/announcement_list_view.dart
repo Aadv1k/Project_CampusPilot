@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class AnnouncementListView extends StatefulWidget {
-  const AnnouncementListView({super.key, });
+  const AnnouncementListView({
+    super.key,
+  });
 
   @override
   State<AnnouncementListView> createState() => _AnnouncementListViewState();
 }
-
 
 List<Announcement> mockAnnouncementData = [
   Announcement(
@@ -86,9 +87,7 @@ List<Announcement> mockAnnouncementData = [
     "Mr. Anand",
     "2024-07-07T11:00:00.000Z",
   ),
-
 ];
-
 
 class _AnnouncementListViewState extends State<AnnouncementListView> {
   List<Announcement> data = mockAnnouncementData;
@@ -108,71 +107,84 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
   @override
   Widget build(BuildContext context) {
     List<Announcement> filteredData = searchActive
-        ? data.where((announcement) => announcement.body.toLowerCase().contains(searchText.toLowerCase())).toList()
+        ? data
+            .where((announcement) => announcement.body
+                .toLowerCase()
+                .contains(searchText.toLowerCase()))
+            .toList()
         : data;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Announcements", style: TextStyle(color: Palette.gray800, fontWeight: FontWeight.bold, fontSize: FontSize.xxl)),
-        backgroundColor: Palette.white,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-                      decoration: const BoxDecoration(
-                        color: Palette.gray200,
-                        borderRadius: BorderRadius.all(Radius.circular(16))
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center, 
-                        children: [
-                          const Icon(Icons.search, color: Palette.gray500, size: 28),
-                          const SizedBox(width: Spacing.sm),
-                          Expanded(
-                            child: TextField(
+        appBar: AppBar(
+          title: const Text("Announcements",
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                  color: Palette.gray800,
+                  fontWeight: FontWeight.bold,
+                  fontSize: FontSize.xl)),
+          backgroundColor: Palette.white,
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: Spacing.md, vertical: Spacing.sm),
+                        decoration: const BoxDecoration(
+                            color: Palette.gray200,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(16))),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.search,
+                                color: Palette.gray400, size: 28),
+                            const SizedBox(width: Spacing.sm),
+                            Expanded(
+                              child: TextField(
                                 decoration: const InputDecoration(
-                                  hintText: 'Search announcements...',
-                                  hintStyle: TextStyle(color: Palette.gray500, fontSize: FontSize.base),
-                                  border: InputBorder.none
-                                ),
+                                    hintText: 'Search announcements...',
+                                    hintStyle: TextStyle(
+                                        color: Palette.gray400,
+                                        fontSize: FontSize.base),
+                                    border: InputBorder.none),
                                 onChanged: _handleSearchInput,
                               ),
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                       const SizedBox(height: Spacing.md),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: filteredData.length,
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      return AnnouncementCard(filteredData[index].id, filteredData[index].title, filteredData[index].body, filteredData[index].authorName, false);
-                    }
-                  ),
+                      itemCount: filteredData.length,
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return AnnouncementCard(
+                            filteredData[index].id,
+                            filteredData[index].title,
+                            filteredData[index].body,
+                            filteredData[index].authorName,
+                            filteredData[index].postedAt);
+                      }),
                 )
-             ],
-              
-             // Search Box
-             // Control Bar
-              
-              
-              ),
-        ),
-      )
-    );
+              ],
+
+              // Search Box
+              // Control Bar
+            ),
+          ),
+        ));
   }
 }
