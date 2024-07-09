@@ -11,7 +11,7 @@ class UserLoginService extends ChangeNotifier {
   static const serviceUrl = "http://localhost:8000/api/users";
 
   void loginUser(UserLoginModel userLogin) async {
-    HttpResponse res = await http.post(
+    HttpResponse res = (await http.post(
       Uri.parse("$serviceUrl/login"), 
       headers: { 
         "Content-Type": "application/json",
@@ -21,7 +21,7 @@ class UserLoginService extends ChangeNotifier {
         "phoneNumber": userLogin.phoneNumber,
         "deviceToken": "joemama"
       })
-    )
+    )) as HttpResponse;
 
     if (res.statusCode != 200) {
       // TODO

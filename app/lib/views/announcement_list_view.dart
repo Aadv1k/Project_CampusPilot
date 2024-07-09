@@ -1,11 +1,9 @@
 import 'package:app/components/announcement_card.dart';
-import 'package:app/components/safe_scaffold.dart';
-import 'package:app/components/typography.dart';
+import 'package:app/components/button.dart';
 import 'package:app/models/announcement.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class AnnouncementListView extends StatefulWidget {
   const AnnouncementListView({
@@ -116,12 +114,30 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Announcements",
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                  color: Palette.gray800,
-                  fontWeight: FontWeight.bold,
-                  fontSize: FontSize.xl)),
+          toolbarHeight: Heights.xl,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            child:
+                IconButton(onPressed: () => {}, icon: const Icon(Icons.menu)),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+              child: UserProfileButton(
+                profileInitials: "AP",
+                size: Widths.lg,
+                radius: Radii.md,
+              ),
+            ),
+          ],
+          centerTitle: true,
+          title: const Text(
+            "Announcements",
+            style: TextStyle(
+                color: Palette.slate900,
+                fontWeight: FontWeight.bold,
+                fontSize: FontSize.lg),
+          ),
           backgroundColor: Palette.white,
         ),
         body: SafeArea(
@@ -138,21 +154,21 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: Spacing.md, vertical: Spacing.sm),
                         decoration: const BoxDecoration(
-                            color: Palette.gray200,
+                            color: Palette.slate200,
                             borderRadius:
-                                BorderRadius.all(Radius.circular(16))),
+                                BorderRadius.all(Radius.circular(Radii.lg))),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const Icon(Icons.search,
-                                color: Palette.gray400, size: 28),
+                                color: Palette.slate400, size: Widths.md),
                             const SizedBox(width: Spacing.sm),
                             Expanded(
                               child: TextField(
                                 decoration: const InputDecoration(
-                                    hintText: 'Search announcements...',
+                                    hintText: 'Search Announcements...',
                                     hintStyle: TextStyle(
-                                        color: Palette.gray400,
+                                        color: Palette.slate400,
                                         fontSize: FontSize.base),
                                     border: InputBorder.none),
                                 onChanged: _handleSearchInput,
@@ -180,9 +196,6 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
                       }),
                 )
               ],
-
-              // Search Box
-              // Control Bar
             ),
           ),
         ));

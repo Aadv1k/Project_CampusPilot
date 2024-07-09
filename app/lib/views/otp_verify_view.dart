@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:app/components/button.dart';
-import 'package:app/components/safe_scaffold.dart';
-import 'package:app/components/typography.dart';
+import 'package:app/models/login_data.dart';
+import 'package:app/models/user_model.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:app/views/announcement_list_view.dart';
@@ -10,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class OtpVerifyView extends StatefulWidget {
-  const OtpVerifyView({super.key});
+  final UserLoginDetails loginDetails;
+
+  const OtpVerifyView(this.loginDetails, {super.key});
 
   @override
   _OtpVerifyViewState createState() => _OtpVerifyViewState();
@@ -31,20 +32,40 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
     });
 
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const AnnouncementListView()),
-      );
+      final success = _simulateOtpVerification();
+
       setState(() {
         _otpLoading = false;
-        // hasError = true;
-        // errorMessage =
-        //     "Unable to send OTP due to internal error, please try again later";
       });
+
+      if (success) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AnnouncementListView()),
+        );
+      } else {
+        setState(() {
+          hasError = true;
+          errorMessage =
+              "Unable to send OTP due to internal error, please try again later";
+        });
+      }
     });
   }
 
+  bool _simulateOtpVerification() {
+    return true;
+  }
+
   void _handleOtpSubmit(String otpStr) {
+    if (this._otp.isEmpty) {
+      setState(() {
+        hasError = true;
+        errorMessage = "Please enter your OTP before proceeding";
+      });
+      return;
+    }
+
     _sendOtpAndUpdate();
   }
 
@@ -73,99 +94,102 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeScaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back)),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg, vertical: Spacing.md),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SquareIconButton(
-                icon: Icons.chevron_left_sharp,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                size: 48,
-              ),
-              const SizedBox(height: Spacing.md),
-              const Heading(
-                  order: 2,
-                  text: "Verify your OTP",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: Spacing.xs),
-              Text(
-                "We texted you a code. Please verify that",
-                style: TextStyle(
-                    fontSize: FontSize.base, color: Colors.grey.shade500),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              OtpTextField(
-                numberOfFields: 5,
-                showFieldAsBox: true,
-                margin: const EdgeInsets.only(right: Spacing.sm),
-                clearText: true,
-                fieldWidth: 44,
-                borderRadius:
-                    const BorderRadius.all(Radius.circular(Spacing.sm)),
-                onSubmit: _handleOtpSubmit,
-                onCodeChanged: (value) {
-                  setState(() {
-                    _otp = value;
-                  });
-                },
-                borderColor: Colors.transparent,
-                enabledBorderColor: Palette.gray200,
-                focusedBorderColor: Palette.primary,
-                disabledBorderColor: Palette.gray200,
-                filled: true,
-                fillColor: Palette.gray200,
-                textStyle: const TextStyle(
-                    fontSize: FontSize.base,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.gray400),
-                enabled: !_otpLoading,
-              ),
-              const SizedBox(height: Spacing.xs),
-              TextButton(
-                onPressed: _resendButtonEnabled ? _handleResend : null,
-                child: Text(
-                  _resendButtonEnabled
-                      ? "Didn't get the code?"
-                      : "Resend in $_resendTimer",
-                  style: TextStyle(
-                    fontSize: FontSize.base,
-                    color: _resendButtonEnabled
-                        ? Palette.gray400
-                        : Palette.gray200,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: Spacing.md),
+                  Text(
+                    "Verify the OTP Sent to ***** ${widget.loginDetails.phoneNumber.substring(5, 10)}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: FontSize.xl,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: Spacing.xs),
+                ],
+              ),
+              Column(
+                children: [
+                  OtpTextField(
+                    numberOfFields: 6,
+                    showFieldAsBox: true,
+                    margin: const EdgeInsets.only(right: Spacing.sm),
+                    clearText: true,
+                    fieldWidth: Widths.lg,
+                    borderRadius:
+                        const BorderRadius.all(Radius.circular(Spacing.sm)),
+                    onSubmit: _handleOtpSubmit,
+                    onCodeChanged: (value) {
+                      setState(() {
+                        _otp = value;
+                      });
+                    },
+                    borderColor: Colors.transparent,
+                    enabledBorderColor: Palette.slate200,
+                    focusedBorderColor: Palette.slate950,
+                    disabledBorderColor: Palette.gray200,
+                    filled: true,
+                    fillColor: Palette.slate200,
+                    textStyle: const TextStyle(
+                      fontSize: FontSize.lg,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.slate500,
+                    ),
+                    enabled: !_otpLoading,
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  TextButton(
+                    onPressed: _resendButtonEnabled ? _handleResend : null,
+                    child: Text(
+                      _resendButtonEnabled
+                          ? "Didn't get the code?"
+                          : "Resend in $_resendTimer",
+                      style: TextStyle(
+                        fontSize: FontSize.base,
+                        color: _resendButtonEnabled
+                            ? Palette.slate500
+                            : Palette.slate300,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  PrimaryButton(
+                    width: double.infinity,
+                    text: "Continue",
+                    onPressed: () => _handleOtpSubmit(_otp),
+                    isLoading: _otpLoading,
+                  ),
+                  if (hasError) const SizedBox(height: Spacing.md),
+                  Text(
+                    errorMessage ?? "",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: FontSize.base,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          Column(
-            children: [
-              PrimaryButton(
-                width: double.infinity,
-                text: "Verify",
-                onPressed: () => _handleOtpSubmit(_otp),
-                isLoading: _otpLoading,
-              ),
-              if (hasError) const SizedBox(height: Spacing.sm),
-              Text(
-                errorMessage ?? "",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: FontSize.sm,
-                ),
-              ),
-            ],
-          )
-        ],
+        ),
       ),
     );
   }

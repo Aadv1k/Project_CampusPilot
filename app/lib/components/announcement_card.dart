@@ -36,6 +36,7 @@ class AnnouncementCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: InkWell(
+        splashColor: Palette.slate200,
         onTap: () {
           Navigator.push(
             context,
@@ -47,7 +48,7 @@ class AnnouncementCard extends StatelessWidget {
         child: Container(
           decoration: const BoxDecoration(
               border: Border(
-                  bottom: BorderSide(color: Palette.gray100, width: 2.0))),
+                  bottom: BorderSide(color: Palette.slate100, width: 2.0))),
           child: Padding(
             padding: const EdgeInsets.symmetric(
                 vertical: Spacing.lg, horizontal: Spacing.lg),
@@ -60,11 +61,11 @@ class AnnouncementCard extends StatelessWidget {
                   children: [
                     Text(authorName,
                         style: const TextStyle(
-                            fontSize: FontSize.sm, color: Palette.gray400)),
+                            fontSize: FontSize.sm, color: Palette.slate400)),
                     Text(extractHourAndMinute(postedAt),
                         style: const TextStyle(
                             fontSize: FontSize.sm,
-                            color: Palette.gray500,
+                            color: Palette.slate500,
                             fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -76,7 +77,7 @@ class AnnouncementCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                          color: Palette.gray900,
+                          color: Palette.slate900,
                           fontWeight: FontWeight.bold,
                           fontSize: FontSize.md),
                     ),
@@ -85,7 +86,7 @@ class AnnouncementCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: Palette.gray600, fontSize: FontSize.base))
+                            color: Palette.slate600, fontSize: FontSize.base))
                   ],
                 )
               ],

@@ -16,4 +16,23 @@ class Palette {
   static const Color gray800 = Color(0xFF1F2937);
   static const Color gray900 = Color(0xFF111827);
   static const Color gray950 = Color(0xFF030712);
+
+  static const Color slate50 = Color(0xFFF8FAFC);
+  static const Color slate100 = Color(0xFFF1F5F9);
+  static const Color slate200 = Color(0xFFE2E8F0);
+  static const Color slate300 = Color(0xFFCBD5E1);
+  static const Color slate400 = Color(0xFF94A3B8);
+  static const Color slate500 = Color(0xFF64748B);
+  static const Color slate600 = Color(0xFF475569);
+  static const Color slate700 = Color(0xFF334155);
+  static const Color slate800 = Color(0xFF1E293B);
+  static const Color slate900 = Color(0xFF0F172A);
+  static const Color slate950 = Color(0xFF020617);
+
+  static const Color pastelOrange = Color(0xFFF6995C);
+  static const Color pastelAqua = Color(0xFF51829b);
+  static const Color pastelIceBlue = Color(0xFF9BB0C1);
+  static const Color pastelRed = Color(0xFFD37676);
+  static const Color pastelLavender = Color(0xFF8E7AB5);
+  static const Color pastelPink = Color(0xFFE493B3);
 }

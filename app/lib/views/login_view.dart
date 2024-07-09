@@ -36,7 +36,8 @@ class _LoginViewState extends State<LoginView> {
         errorMessage = null;
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const OtpVerifyView()),
+          MaterialPageRoute(
+              builder: (context) => OtpVerifyView(_userLoginDetails)),
         );
       }
     });
@@ -83,14 +84,14 @@ class _LoginViewState extends State<LoginView> {
                   width: double.infinity,
                   text: "Sign in",
                 ),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: Spacing.md),
                 MailtoLink(
                     emailSubject: "Support request: Can't login",
                     emailBody:
                         "Entered Number: ${_userLoginDetails.phoneNumber}\nErrors: ${hasError ? errorMessage : "None"}",
-                    child: Text("Can't login? Contact support.",
-                        style: const TextStyle(
-                            color: Palette.gray400, fontSize: FontSize.base))),
+                    child: const Text("Can't login? Contact support.",
+                        style: TextStyle(
+                            color: Palette.slate500, fontSize: FontSize.base))),
               ],
             ),
           ],
