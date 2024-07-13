@@ -1,4 +1,3 @@
-import 'package:app/components/typography.dart';
 import 'package:app/models/announcement.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';

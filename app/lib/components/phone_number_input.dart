@@ -109,6 +109,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                     padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                     child: Center(
                       child: TextField(
+                        autocorrect: true,
                         focusNode: _focusNode,
                         keyboardType: TextInputType.phone,
                         controller: phoneNumberInputController,

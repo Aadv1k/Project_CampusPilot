@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:app/components/button.dart';
-import 'package:app/models/login_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
@@ -95,100 +94,99 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButton(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back)),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg, vertical: Spacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: Spacing.md),
-                  Text(
-                    "Verify the OTP Sent to ***** ${widget.loginDetails.phoneNumber.substring(5, 10)}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: FontSize.xl,
-                    ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.lg, vertical: Spacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Verify the OTP Sent to ***** ${widget.loginDetails.phoneNumber.substring(5, 10)}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: FontSize.xl,
                   ),
-                  const SizedBox(height: Spacing.xs),
-                ],
-              ),
-              Column(
-                children: [
-                  OtpTextField(
-                    numberOfFields: 6,
-                    showFieldAsBox: true,
-                    margin: const EdgeInsets.only(right: Spacing.sm),
-                    clearText: true,
-                    fieldWidth: Widths.lg,
-                    borderRadius:
-                        const BorderRadius.all(Radius.circular(Spacing.sm)),
-                    onSubmit: _handleOtpSubmit,
-                    onCodeChanged: (value) {
-                      setState(() {
-                        _otp = value;
-                      });
-                    },
-                    borderColor: Colors.transparent,
-                    enabledBorderColor: Palette.slate200,
-                    focusedBorderColor: Palette.slate950,
-                    disabledBorderColor: Palette.gray200,
-                    filled: true,
-                    fillColor: Palette.slate200,
-                    textStyle: const TextStyle(
-                      fontSize: FontSize.lg,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.slate500,
-                    ),
-                    enabled: !_otpLoading,
+                ),
+              ],
+            ),
+            const Spacer(),
+            Column(
+              children: [
+                OtpTextField(
+                  numberOfFields: 6,
+                  showFieldAsBox: true,
+                  margin: const EdgeInsets.only(right: Spacing.sm),
+                  clearText: true,
+                  fieldWidth: Widths.lg,
+                  borderRadius:
+                      const BorderRadius.all(Radius.circular(Spacing.sm)),
+                  onSubmit: _handleOtpSubmit,
+                  onCodeChanged: (value) {
+                    setState(() {
+                      _otp = value;
+                    });
+                  },
+                  borderColor: Colors.transparent,
+                  enabledBorderColor: Palette.slate200,
+                  focusedBorderColor: Palette.slate950,
+                  disabledBorderColor: Palette.gray200,
+                  filled: true,
+                  fillColor: Palette.slate200,
+                  textStyle: const TextStyle(
+                    fontSize: FontSize.lg,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.slate500,
                   ),
-                  const SizedBox(height: Spacing.sm),
-                  TextButton(
-                    onPressed: _resendButtonEnabled ? _handleResend : null,
-                    child: Text(
-                      _resendButtonEnabled
-                          ? "Didn't get the code?"
-                          : "Resend in $_resendTimer",
-                      style: TextStyle(
-                        fontSize: FontSize.base,
-                        color: _resendButtonEnabled
-                            ? Palette.slate500
-                            : Palette.slate300,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  PrimaryButton(
-                    width: double.infinity,
-                    text: "Continue",
-                    onPressed: () => _handleOtpSubmit(_otp),
-                    isLoading: _otpLoading,
-                  ),
-                  if (hasError) const SizedBox(height: Spacing.md),
-                  Text(
-                    errorMessage ?? "",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.red,
+                  enabled: !_otpLoading,
+                ),
+                const SizedBox(height: Spacing.sm),
+                TextButton(
+                  onPressed: _resendButtonEnabled ? _handleResend : null,
+                  child: Text(
+                    _resendButtonEnabled
+                        ? "Didn't get the code?"
+                        : "Resend in $_resendTimer",
+                    style: TextStyle(
                       fontSize: FontSize.base,
+                      color: _resendButtonEnabled
+                          ? Palette.slate500
+                          : Palette.slate300,
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Column(
+              children: [
+                PrimaryButton(
+                  width: double.infinity,
+                  text: "Continue",
+                  onPressed: () => _handleOtpSubmit(_otp),
+                  isLoading: _otpLoading,
+                ),
+                if (hasError) const SizedBox(height: Spacing.md),
+                Text(
+                  errorMessage ?? "",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: FontSize.base,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -1,12 +1,9 @@
-import 'dart:ui_web';
-
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  final double height;
   final double width;
   final String text;
   final bool isLoading;
@@ -16,7 +13,6 @@ class PrimaryButton extends StatelessWidget {
     required this.width,
     required this.text,
     this.onPressed,
-    this.height = 72.0,
     this.isLoading = false,
   });
 

@@ -2,14 +2,11 @@ import 'package:app/common/phone_number.dart';
 import 'package:app/components/button.dart';
 import 'package:app/components/mailto_link.dart';
 import 'package:app/components/phone_number_input.dart';
-import 'package:app/components/safe_scaffold.dart';
-import 'package:app/components/typography.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:app/views/otp_verify_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -47,11 +44,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(
-            top: Spacing.xxl,
-            left: Spacing.lg,
-            right: Spacing.lg,
-            bottom: Spacing.md),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,6 +60,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ],
             ),
+            const Spacer(),
             Column(
               children: [
                 PhoneNumberInput(
@@ -78,13 +72,13 @@ class _LoginViewState extends State<LoginView> {
                   hasError: hasError,
                   errorMessage: errorMessage,
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: Spacing.xs),
                 PrimaryButton(
                   onPressed: _handleVerifyTap,
                   width: double.infinity,
                   text: "Sign in",
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: Spacing.sm),
                 MailtoLink(
                     emailSubject: "Support request: Can't login",
                     emailBody:
