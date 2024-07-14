@@ -1,3 +1,4 @@
+import 'package:app/components/scope_selector.dart';
 import 'package:app/models/announcement.dart';
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
@@ -66,86 +67,9 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
 
               const SizedBox(height: Spacing.md),
 
-              Container(
-                height: MediaQuery.sizeOf(context).height / 3,
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                decoration: BoxDecoration(
-                  color: Palette.offWhite100,
-                  border: Border.all(color: Palette.slate200, width: 1),
-                  borderRadius: BorderRadius.circular(Radii.sm)
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: const BoxDecoration(border: Border(right: BorderSide(color: Palette.slate300, width: 1))),
-                        child: const Column(children: [
-                          ScopeSelectorItem(text: "Students", ),
-                          ScopeSelectorItem(text: "Teachers"),
-                        ],)
-                      ),
-                    ),
-                
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Container(decoration: const BoxDecoration(border: Border(right: BorderSide(color: Palette.slate300, width: 1))),
-                          child: const Column(children: [
-                            ScopeSelectorItem(text: "6th"),
-                            ScopeSelectorItem(text: "7th"),
-                            ScopeSelectorItem(text: "8th"),
-                            ScopeSelectorItem(text: "9th"),
-                            ScopeSelectorItem(text: "10th"),
-                            ScopeSelectorItem(text: "11th"),
-                            ScopeSelectorItem(text: "12th"),
-                          ],)
-                        ),
-                      ),
-                    ),
-
-
-                    Expanded(child: Container())
-                  ],
-                )
-              )
+              const ScopeSelector()
             ],
           ),
         ));
-  }
-}
-
-class ScopeSelectorItem extends StatelessWidget {
-  const ScopeSelectorItem({required this.text, super.key, this.active});
-
-  final String text;
-  final bool? active;
-
-  final double _accentBorderSize = 5;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: active != null ? Palette.lightBlue.withOpacity(0.3) : null,
-        border: Border(left: BorderSide(color: active == true ? Palette.lightBlue : Colors.transparent, width: _accentBorderSize)),
-      ),
-
-      padding: const EdgeInsets.only(left: Spacing.xs, right: Spacing.md, top: Spacing.lg, bottom: Spacing.lg),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: FontSize.sm,
-                  color: Palette.slate600,
-                )),
-          ),
-
-          const Icon(Icons.chevron_right_rounded, color: Palette.slate400, size: Widths.xs)
-        ],
-      ),
-    );
   }
 }
