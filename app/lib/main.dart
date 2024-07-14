@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           title: "Project CampusPilot",
           theme: ThemeData(brightness: Brightness.light)
               .copyWith(textTheme: GoogleFonts.poppinsTextTheme()),
-          home: snapshot.data! ? const LoginView() : const AnnouncementListView(),
+          home: const AnnouncementListView(),
           debugShowCheckedModeBanner: true,
         );
       }

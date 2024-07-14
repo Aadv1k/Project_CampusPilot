@@ -90,13 +90,29 @@ List<Announcement> mockAnnouncementData = [
 class _AnnouncementListViewState extends State<AnnouncementListView> {
   List<Announcement> data = mockAnnouncementData;
   String searchText = "";
-  late bool searchActive;
+  bool searchActive = false;
+  DateTime _lastInputTime = DateTime.now();
 
-  _AnnouncementListViewState() {
-    searchActive = searchText.trim().isEmpty;
+  void _toggleSearchActive(bool to) {
+    setState(() {
+      searchActive = to;
+    });
   }
 
-  void _handleSearchInput(String text) {
+  void _handleSearchInput(String? text) {
+    if (text == null) return;
+
+    final currentTime = DateTime.now();
+
+    if (currentTime.difference(_lastInputTime) == const Duration(seconds: 2)) {
+      // TODO: get back to this 
+      print("Search: ${searchText}");
+      setState(() {
+        _lastInputTime = currentTime;
+      });
+      return;
+    }
+
     setState(() {
       searchText = text;
     });
@@ -104,100 +120,288 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
 
   @override
   Widget build(BuildContext context) {
-    List<Announcement> filteredData = searchActive
-        ? data
-            .where((announcement) => announcement.body
-                .toLowerCase()
-                .contains(searchText.toLowerCase()))
-            .toList()
-        : data;
-
     return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: Heights.xl,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-            child:
-                IconButton(onPressed: () => {}, icon: const Icon(Icons.menu)),
+        appBar: searchActive ? SearchAppBar(onBack: () => _toggleSearchActive(false)) : const MainAppBar(),
+
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SearchBar(onInput: _handleSearchInput, onTap: ()  => _toggleSearchActive(true), active: searchActive,),
+            
+            // TODO: show search controls here as well, but that is too much work for now
+            searchActive ?  Container(height: Heights.sm, decoration: const BoxDecoration(
+              color: Palette.offWhite100,
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40))
+            ),) : const TabControl(),
+            
+            Expanded(
+              child: ListView.builder(
+                  itemCount: mockAnnouncementData.length,
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return AnnouncementCard(
+                        mockAnnouncementData[index].id,
+                        mockAnnouncementData[index].title,
+                        mockAnnouncementData[index].body,
+                        mockAnnouncementData[index].authorName,
+                        mockAnnouncementData[index].postedAt);
+                  }),
+            )
+          ],
+        ));
+  }
+}
+
+class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback onBack;
+
+  const SearchAppBar({
+    required this.onBack,
+    super.key,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(Heights.lg);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      scrolledUnderElevation: 0.0,
+      backgroundColor: Palette.offWhite100,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: onBack,
+      ),
+    );
+  }
+}
+
+
+
+class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const MainAppBar({
+    super.key,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(Heights.xl);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      toolbarHeight: Heights.xl,
+      leading: IconButton(onPressed: () => {}, icon: const Icon(Icons.menu)),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          child: UserProfileButton(
+            profileInitials: "AP",
+            size: Widths.lg,
+            radius: Radii.md,
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-              child: UserProfileButton(
-                profileInitials: "AP",
-                size: Widths.lg,
-                radius: Radii.md,
+        ),
+      ],
+      centerTitle: true,
+      title: const Text(
+        "Announcements",
+        style: TextStyle(
+            color: Palette.slate900,
+            fontWeight: FontWeight.bold,
+            fontSize: FontSize.lg),
+      ),
+      backgroundColor: Palette.white,
+    );
+  }
+}
+
+class SearchChip extends StatelessWidget {
+  final String text;
+  final bool isActive;
+
+  const SearchChip({
+    required this.text,
+    this.isActive = false,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Color? fillColor = isActive ? Palette.slate950 : Palette.offWhite100;
+    Color? textColor = isActive ? Palette.slate100 : Palette.slate950;
+
+    return ActionChip(
+      backgroundColor: fillColor,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: Palette.gray950),
+        borderRadius: BorderRadius.circular(Radii.xl),
+      ),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(text, style: TextStyle(color: textColor, fontSize: FontSize.sm)),
+          const SizedBox(width: Spacing.sm),
+          !isActive 
+            ? const Icon(Icons.arrow_drop_down, color: Palette.slate800, size: Widths.sm) 
+            : const SizedBox(height: Widths.sm),
+    
+        ],
+      ),
+      onPressed: () {
+        // Handle chip press event
+      },
+    );
+  }
+}
+
+class SearchControl extends StatelessWidget {
+  const SearchControl({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.md),
+      decoration: const BoxDecoration(
+        color: Palette.offWhite100,
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(35), bottomRight: Radius.circular(35))
+      ),
+      child: const Row(children: [
+        SearchChip(text: "Posted By", isActive: false),
+        SizedBox(width: Spacing.sm),
+        SearchChip(text: "Date"),
+      ]),
+    );
+  }
+}
+
+class TabControl extends StatelessWidget {
+  const TabControl({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.md),
+      child: Row(children: [
+        TabButton("For You", true, () => {}),
+        const SizedBox(width: Spacing.sm),
+        TabButton("Your Announcements", false, () => {})
+      ]),
+    );
+  }
+}
+
+class TabButton extends StatelessWidget {
+  const TabButton(this.text, this.selected, this.onTap, {super.key});
+
+  final String text;
+  final bool selected;
+  final void Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          height: Heights.lg,
+          decoration: BoxDecoration(
+              border: Border.all(color: Palette.slate950, width: 1.0),
+              color: selected ? Palette.slate950 : null,
+              borderRadius: BorderRadius.circular(Radii.xl)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            child: Center(
+                child: Text(text,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: FontSize.base,
+                        color:
+                            selected ? Palette.slate100 : Palette.slate950))),
+          )),
+    );
+  }
+}
+
+class SearchBar extends StatefulWidget {
+  final Function(String?) onInput;
+  final Function() onTap;
+  final bool active;
+
+  const SearchBar({
+    required this.onInput,
+    required this.onTap,
+    this.active = false,
+    super.key,
+  });
+
+  @override
+  _SearchBarState createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<SearchBar> {
+  late FocusNode _focusNode;
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _controller = TextEditingController();
+
+    _controller.addListener(() {
+      final String searchText = _controller.text.toLowerCase();
+      widget.onInput(searchText);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: widget.active ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+      decoration: BoxDecoration(
+        color: Palette.offWhite100,
+        borderRadius: widget.active ? null : const BorderRadius.all(Radius.circular(Radii.xl)),
+        border: !widget.active ? Border.all(color: Palette.slate200, width: 1.0) : null,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          widget.active ? const SizedBox.shrink() : const Icon(Icons.search, color: Palette.slate400, size: Widths.md),
+          const SizedBox(width: Spacing.sm),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                widget.onTap();
+              },
+              child: TextField(
+                enabled: widget.active,
+                focusNode: _focusNode,
+                controller: _controller,
+                decoration: const InputDecoration(
+                  hintText: 'Search Announcements...',
+                  hintStyle: TextStyle(
+                    color: Palette.slate600,
+                    fontSize: FontSize.base,
+                  ),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(color: Palette.slate800, fontSize: FontSize.md),
               ),
             ),
-          ],
-          centerTitle: true,
-          title: const Text(
-            "Announcements",
-            style: TextStyle(
-                color: Palette.slate900,
-                fontWeight: FontWeight.bold,
-                fontSize: FontSize.lg),
           ),
-          backgroundColor: Palette.white,
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: Spacing.md, vertical: Spacing.sm),
-                        decoration: const BoxDecoration(
-                            color: Palette.slate200,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(Radii.lg))),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.search,
-                                color: Palette.slate400, size: Widths.md),
-                            const SizedBox(width: Spacing.sm),
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                    hintText: 'Search Announcements...',
-                                    hintStyle: TextStyle(
-                                        color: Palette.slate400,
-                                        fontSize: FontSize.base),
-                                    border: InputBorder.none),
-                                onChanged: _handleSearchInput,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: Spacing.md),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                      itemCount: filteredData.length,
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return AnnouncementCard(
-                            filteredData[index].id,
-                            filteredData[index].title,
-                            filteredData[index].body,
-                            filteredData[index].authorName,
-                            filteredData[index].postedAt);
-                      }),
-                )
-              ],
-            ),
-          ),
-        ));
+        ],
+      ),
+    );
   }
 }

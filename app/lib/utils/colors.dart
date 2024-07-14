@@ -35,4 +35,7 @@ class Palette {
   static const Color pastelRed = Color(0xFFD37676);
   static const Color pastelLavender = Color(0xFF8E7AB5);
   static const Color pastelPink = Color(0xFFE493B3);
+
+
+  static const Color offWhite100 = Color(0xFFE3F4F4);
 }
