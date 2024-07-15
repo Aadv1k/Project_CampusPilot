@@ -56,7 +56,7 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
                 child: Text("Select an Audience", style: TextStyle(fontWeight: FontWeight.bold, fontSize: FontSize.lg)),
               ),
               SizedBox(height: Spacing.md),
-              ScopeSelector() 
+              ScopeSelectorMenu() 
             ],
           ),
         );
