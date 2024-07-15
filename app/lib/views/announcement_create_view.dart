@@ -36,6 +36,8 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          scrolledUnderElevation: 0.0,
+          backgroundColor: Palette.white,
           leading: IconButton(
             icon: const Icon(
               Icons.chevron_left_rounded,
@@ -59,10 +61,10 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
                 controller: _titleController,
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  hintStyle: TextStyle(fontSize: FontSize.xl, color: Palette.slate400),
+                  hintStyle: TextStyle(fontSize: FontSize.lg, color: Palette.slate400),
                   hintText: "Announcement Title..."
                 ),
-                style: TextStyle(fontSize: FontSize.xl, fontWeight: FontWeight.bold)
+                style: TextStyle(fontSize: FontSize.lg, color: Palette.slate800)
               ),
 
               const SizedBox(height: Spacing.md),

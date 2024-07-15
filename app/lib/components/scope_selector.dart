@@ -1,7 +1,10 @@
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
+import 'dart:collection';
 
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 /*
 
@@ -28,92 +31,67 @@ Student
     -> A
 */
 
-// class ScopeStructure {
-//   ScopeStructure({
-//     required this.value,
-//     required this.userReadable,
-//     this.children = const [],
-//   });
+class MenuStructure {
+  MenuStructure({
+    required this.value,
+    required this.key,
+    this.children = const [],
+  });
 
-//   String value;
-//   String userReadable;
-//   List<ScopeStructure> children;
-// }
+  String value;
+  String key;
+  List<MenuStructure> children;
+}
 
-// final baseStructure = [
-//   ScopeStructure(
-//     value: "students",
-//     userReadable: "Students",
-//     children: [
-//       ScopeStructure(
-//         value: "8",
-//         userReadable: "8th Grade",
-//         children: [
-//           ScopeStructure(value: "8A", userReadable: "A", children: []),
-//           ScopeStructure(value: "8B", userReadable: "B", children: []),
-//           ScopeStructure(value: "8C", userReadable: "C", children: []),
-//         ],
-//       ),
-//       ScopeStructure(
-//         value: "9",
-//         userReadable: "9th Grade",
-//         children: [
-//           ScopeStructure(value: "9A", userReadable: "A", children: []),
-//           ScopeStructure(value: "9B", userReadable: "B", children: []),
-//           ScopeStructure(value: "9C", userReadable: "C", children: []),
-//         ],
-//       ),
-//       ScopeStructure(
-//         value: "10",
-//         userReadable: "10th Grade",
-//         children: [
-//           ScopeStructure(value: "10A", userReadable: "A", children: []),
-//           ScopeStructure(value: "10B", userReadable: "B", children: []),
-//           ScopeStructure(value: "10C", userReadable: "C", children: []),
-//         ],
-//       ),
-//     ],
-//   ),
-//   ScopeStructure(
-//     value: "teachers",
-//     userReadable: "Teachers",
-//     children: [
-//       ScopeStructure(
-//         value: "math",
-//         userReadable: "Math Department",
-//         children: [
-//           ScopeStructure(value: "algebra", userReadable: "Algebra", children: []),
-//           ScopeStructure(value: "geometry", userReadable: "Geometry", children: []),
-//           ScopeStructure(value: "calculus", userReadable: "Calculus", children: []),
-//         ],
-//       ),
-//       ScopeStructure(
-//         value: "science",
-//         userReadable: "Science Department",
-//         children: [
-//           ScopeStructure(value: "physics", userReadable: "Physics", children: []),
-//           ScopeStructure(value: "chemistry", userReadable: "Chemistry", children: []),
-//           ScopeStructure(value: "biology", userReadable: "Biology", children: []),
-//         ],
-//       ),
-//       ScopeStructure(
-//         value: "languages",
-//         userReadable: "Languages Department",
-//         children: [
-//           ScopeStructure(value: "english", userReadable: "English", children: []),
-//           ScopeStructure(value: "spanish", userReadable: "Spanish", children: []),
-//           ScopeStructure(value: "french", userReadable: "French", children: []),
-//         ],
-//       ),
-//     ],
-//   ),
-// ];
+final baseStructure = [
+  MenuStructure(
+    value: "students",
+    key: "Students",
+    children: [
+      MenuStructure(value: "8A", key: "8A", children: []),
+      MenuStructure(value: "8B", key: "8B", children: []),
+      MenuStructure(value: "8C", key: "8C", children: []),
+      MenuStructure(value: "9A", key: "9A", children: []),
+      MenuStructure(value: "9B", key: "9B", children: []),
+      MenuStructure(value: "9C", key: "9C", children: []),
+      MenuStructure(value: "10A", key: "10A", children: []),
+      MenuStructure(value: "10B", key: "10B", children: []),
+      MenuStructure(value: "10C", key: "10C", children: []),
+    ],
+  ),
+  MenuStructure(
+    value: "teachers",
+    key: "Teachers",
+    children: [
+      MenuStructure(value: "math", key: "Math Department", children: []),
+      MenuStructure(value: "science", key: "Science Department", children: []),
+      MenuStructure(value: "languages", key: "Languages Department", children: []),
+    ],
+  ),
+];
 
-class MenuChild {
-  const MenuChild({required this.value, required this.userReadable});
+class MenuElement {
+  const MenuElement(
+      {required this.key,
+      required this.value,
+      required this.level,
+      this.childrenRef});
 
   final String value;
-  final String userReadable;
+  final String key;
+  final int level;
+  final UnmodifiableListView<MenuStructure>? childrenRef;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (runtimeType != other.runtimeType) return false;
+    final MenuElement otherElement = other as MenuElement;
+    return level == otherElement.level && key == otherElement.key;
+  }
+
+  @override
+  int get hashCode => Object.hash(level, key);
 }
 
 class ScopeSelector extends StatefulWidget {
@@ -124,59 +102,117 @@ class ScopeSelector extends StatefulWidget {
 }
 
 class _ScopeSelectorState extends State<ScopeSelector> {
-  static const int hierarchyLevel = 3;
+  static const int hierarchyLevel = 2;
 
-  List<List<MenuChild>> currentMenuState = [];
-  List<(int, String)> activeMenuChildren = [];
+  List<List<MenuElement>> currentMenuState = [];
+  List<MenuElement> activeMenuChildren = [];
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
-    currentMenuState.add([
-      const MenuChild(value: "student", userReadable: "Students"),
-      const MenuChild(value: "teacher", userReadable: "Teachers"),
-    ]);
+    currentMenuState.add(menuElementFromMenuStructure(baseStructure, 0));
   }
 
-  void _handleMenuElementTap(int level, MenuChild child) { 
-    setState(() {
-      if (level == 0) {
-        currentMenuState = [currentMenuState[0]];
-        activeMenuChildren = activeMenuChildren.where((elem) => elem.$1 == level && elem.$2 == child.value).toList();
-      } 
-      activeMenuChildren.add((level, child.value));
-    });
+  List<MenuElement> menuElementFromMenuStructure(
+      List<MenuStructure> structure, int level) {
+    return structure
+        .map((e) => MenuElement(
+            value: e.value,
+            key: e.key,
+            level: level,
+            childrenRef: UnmodifiableListView(e.children)))
+        .toList();
+  }
 
-    if (level == 1) {
-      return; // Hard-coded logic for level 1
+  List<MenuElement> getChildrenOfMenuElement(MenuElement element) {
+    return element.childrenRef
+            ?.map((e) => MenuElement(
+                value: e.value,
+                key: e.key,
+                level: element.level + 1,
+                childrenRef: UnmodifiableListView(e.children)))
+            .toList() ??
+        [];
+  }
+
+  void _renderChildrenOfElement(MenuElement child) {
+    setState(() {
+      var children = getChildrenOfMenuElement(child);
+      if (children.isEmpty) {
+        return;
+      }
+
+      currentMenuState.add(children);
+
+    });
+  }
+
+  void _collapseAllOtherColumns(MenuElement child) {
+    setState(() {
+      currentMenuState = currentMenuState.sublist(0, child.level + 1);
+    });
+  }
+
+  void _removeActiveElement(MenuElement child) {
+    setState(() {
+      activeMenuChildren.removeWhere((elem) => elem == child);
+    });
+  }
+
+  void _addActiveElement(MenuElement element) {
+    setState(() {
+      activeMenuChildren.add(element);
+    });
+  }
+
+  Widget _buildMenuElementWidget(MenuElement element) {
+    var children = getChildrenOfMenuElement(element);
+    var hasChildren = children.isNotEmpty;
+    var isActive = activeMenuChildren.contains(element);
+
+    onTapAction() {
+      if (hasChildren) {
+        if (element.level + 1 == currentMenuState.length) {
+          _renderChildrenOfElement(element);
+        } else {
+          _collapseAllOtherColumns(element);
+        }
+      }
+
+      if (!hasChildren) {
+        if (isActive) {
+          _removeActiveElement(element);
+        } else {
+          _addActiveElement(element);
+        }
+      }
     }
 
-    setState(() {
-      if (child.value == "teacher") {
-        currentMenuState.add([
-          const MenuChild(value: "department", userReadable: "Department"),
-          const MenuChild(value: "subject", userReadable: "Subjects"),
-        ]);
-      } else {
-        currentMenuState.add([
-          const MenuChild(value: "9", userReadable: "9th"),
-          const MenuChild(value: "8", userReadable: "8th"),
-          const MenuChild(value: "7", userReadable: "7th"),
-          const MenuChild(value: "6", userReadable: "6th"),
-        ]);
+    onLongPressAction() {
+      if (isActive && element.childrenRef!.isNotEmpty) {
+        getChildrenOfMenuElement(element).forEach(_removeActiveElement);
+        _removeActiveElement(element);
+        return;
       }
-    });
-  } 
 
-  void _handleActiveMenuElementTap(int level, MenuChild child) { 
-    setState(() {
-      activeMenuChildren.remove((level, child.value));
-      currentMenuState = currentMenuState.sublist(0, level + 1);
-    });
-  } 
+      if (element.childrenRef!.isNotEmpty) {
+        HapticFeedback.mediumImpact();
 
-  bool _isMenuItemActive(int level, MenuChild menuItem) {
-    return activeMenuChildren.any((elem) => elem.$1 == level && elem.$2 == menuItem.value);
+        _addActiveElement(element);
+        getChildrenOfMenuElement(element).forEach(_addActiveElement);
+
+        _collapseAllOtherColumns(element);
+        _renderChildrenOfElement(element);
+      }
+    }
+
+    return ScopeSelectorItem(
+      text: element.key,
+      onTap: onTapAction,
+      onLongPress: onLongPressAction,
+      isActive: isActive,
+      noArrow: !hasChildren,
+    );
   }
 
   List<Widget> _buildMenuState() {
@@ -187,20 +223,17 @@ class _ScopeSelectorState extends State<ScopeSelector> {
 
       menuRepr.add(Expanded(
         child: Container(
+          height: double.infinity,
           decoration: const BoxDecoration(
-            border: Border(right: BorderSide(color: Palette.slate200, width: 2)),
+            border:
+                Border(right: BorderSide(color: Palette.slate200, width: 2)),
           ),
-          child: Column(
-            children: currentMenuState[level]
-                .map((menuItem) => ScopeSelectorItem(
-                      active: _isMenuItemActive(level, menuItem),
-                      text: menuItem.userReadable,
-                      onTap: () => _isMenuItemActive(level, menuItem) 
-                          ? _handleActiveMenuElementTap(level, menuItem) 
-                          : _handleMenuElementTap(level, menuItem),
-                      onLongPress: () {},
-                    ))
-                .toList(),
+          child: SingleChildScrollView(
+            child: Column(
+              children: currentMenuState[level]
+                  .map((menuElement) => _buildMenuElementWidget(menuElement))
+                  .toList(),
+            ),
           ),
         ),
       ));
@@ -212,7 +245,10 @@ class _ScopeSelectorState extends State<ScopeSelector> {
   @override
   Widget build(BuildContext context) {
     var cols = _buildMenuState();
-    cols += List.filled(hierarchyLevel - cols.length, Expanded(child: Container()));
+    cols.addAll(List.generate(
+      hierarchyLevel - cols.length,
+      (index) => Expanded(child: Container()),
+    ));
 
     return Container(
       height: MediaQuery.of(context).size.height / 3,
@@ -223,7 +259,7 @@ class _ScopeSelectorState extends State<ScopeSelector> {
         border: Border.all(color: Palette.slate200, width: 1),
         borderRadius: BorderRadius.circular(Radii.sm),
       ),
-      child: Row(children: cols),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: cols),
     );
   }
 }
@@ -233,16 +269,18 @@ class ScopeSelectorItem extends StatelessWidget {
     required this.text,
     required this.onTap,
     required this.onLongPress,
-    this.active,
-    super.key,
-  });
+    required this.isActive,
+    this.noArrow = false,
+    Key? key,
+  }) : super(key: key);
 
   final String text;
-  final bool? active;
+  final bool isActive;
   final Function() onTap;
   final Function() onLongPress;
+  final bool noArrow;
 
-  static const double _accentBorderSize = 5;
+  static const double _accentBorderSize = 2.5;
 
   @override
   Widget build(BuildContext context) {
@@ -251,23 +289,39 @@ class ScopeSelectorItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: active == true ? Palette.lightBlue.withOpacity(0.3) : null,
+          color: isActive ? Palette.lightBlue.withOpacity(0.3) : null,
           border: Border(
-            left: BorderSide(color: active == true ? Palette.lightBlue : Colors.transparent, width: _accentBorderSize),
+            left: BorderSide(
+                color: isActive ? Palette.lightBlue : Colors.transparent,
+                width: _accentBorderSize),
           ),
         ),
-        padding: const EdgeInsets.only(left: Spacing.xs, right: Spacing.md, top: Spacing.lg, bottom: Spacing.lg),
+        padding: const EdgeInsets.only(
+            left: Spacing.md,
+            right: Spacing.md,
+            top: Spacing.md,
+            bottom: Spacing.md),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: FontSize.sm, color: Palette.slate600),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      text,
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(
+                          fontSize: FontSize.sm, color: Palette.slate800),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: Palette.slate400, size: Widths.xs),
+            if (!noArrow)
+              const Icon(Icons.chevron_right_rounded,
+                  color: Palette.slate400, size: Widths.xs),
           ],
         ),
       ),
