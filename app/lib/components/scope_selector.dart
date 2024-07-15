@@ -1,10 +1,9 @@
 import 'package:app/utils/colors.dart';
 import 'package:app/utils/sizes.dart';
 import 'package:flutter/material.dart';
-import 'dart:collection';
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 
 /*
 
@@ -48,15 +47,21 @@ final baseStructure = [
     value: "students",
     key: "Students",
     children: [
-      MenuStructure(value: "8A", key: "8A", children: []),
-      MenuStructure(value: "8B", key: "8B", children: []),
-      MenuStructure(value: "8C", key: "8C", children: []),
-      MenuStructure(value: "9A", key: "9A", children: []),
-      MenuStructure(value: "9B", key: "9B", children: []),
-      MenuStructure(value: "9C", key: "9C", children: []),
-      MenuStructure(value: "10A", key: "10A", children: []),
-      MenuStructure(value: "10B", key: "10B", children: []),
-      MenuStructure(value: "10C", key: "10C", children: []),
+      MenuStructure(value: "8thGrade", key: "8th Grade", children: [
+        MenuStructure(value: "8A", key: "8A", children: []),
+        MenuStructure(value: "8B", key: "8B", children: []),
+        MenuStructure(value: "8C", key: "8C", children: []),
+      ]),
+      MenuStructure(value: "9thGrade", key: "9th Grade", children: [
+        MenuStructure(value: "9A", key: "9A", children: []),
+        MenuStructure(value: "9B", key: "9B", children: []),
+        MenuStructure(value: "9C", key: "9C", children: []),
+      ]),
+      MenuStructure(value: "10thGrade", key: "10th Grade", children: [
+        MenuStructure(value: "10A", key: "10A", children: []),
+        MenuStructure(value: "10B", key: "10B", children: []),
+        MenuStructure(value: "10C", key: "10C", children: []),
+      ]),
     ],
   ),
   MenuStructure(
@@ -69,6 +74,7 @@ final baseStructure = [
     ],
   ),
 ];
+
 
 class MenuElement {
   const MenuElement(
@@ -102,7 +108,7 @@ class ScopeSelector extends StatefulWidget {
 }
 
 class _ScopeSelectorState extends State<ScopeSelector> {
-  static const int hierarchyLevel = 2;
+  static const int hierarchyLevel = 3;
 
   List<List<MenuElement>> currentMenuState = [];
   List<MenuElement> activeMenuChildren = [];
@@ -165,22 +171,46 @@ class _ScopeSelectorState extends State<ScopeSelector> {
     });
   }
 
+  MenuElement? _currentlyOpenedElement = null;
+
+  void _recursivelyActivateEveryChildOfElement(MenuElement element) {
+    _addActiveElement(element);
+    getChildrenOfMenuElement(element).forEach(_recursivelyActivateEveryChildOfElement);
+  }
+
+  void _recursivelyDeactivateEveryChildOfElement(MenuElement element) {
+    _removeActiveElement(element);
+    getChildrenOfMenuElement(element).forEach(_recursivelyDeactivateEveryChildOfElement);
+  }
+
   Widget _buildMenuElementWidget(MenuElement element) {
     var children = getChildrenOfMenuElement(element);
     var hasChildren = children.isNotEmpty;
     var isActive = activeMenuChildren.contains(element);
 
     onTapAction() {
+      // If it has children, then it is a "level/sub-level" in this case
+      // we won't make it active, but simply handle it like a dropdown
+      // unless it is a onLongPress, which can be found below
       if (hasChildren) {
         if (element.level + 1 == currentMenuState.length) {
+          _currentlyOpenedElement = element;
           _renderChildrenOfElement(element);
         } else {
           _collapseAllOtherColumns(element);
+          if (element != _currentlyOpenedElement) {
+            _renderChildrenOfElement(element);
+          }
         }
       }
 
+      // if it has no childre, this means it is an "item" we will simply toggle selection 
       if (!hasChildren) {
         if (isActive) {
+          MenuElement? parentElement = activeMenuChildren.firstWhereOrNull((childElem) => getChildrenOfMenuElement(childElem).contains(element));
+          if (parentElement != null) {
+            _removeActiveElement(parentElement);
+          }
           _removeActiveElement(element);
         } else {
           _addActiveElement(element);
@@ -189,18 +219,27 @@ class _ScopeSelectorState extends State<ScopeSelector> {
     }
 
     onLongPressAction() {
+      // Here we recursively need to DE-SELECT every child of the element
       if (isActive && element.childrenRef!.isNotEmpty) {
-        getChildrenOfMenuElement(element).forEach(_removeActiveElement);
-        _removeActiveElement(element);
+
+        // NOTE: somehow figure out the parent, and de-activate it as well if it is active
+        MenuElement? parentElement = activeMenuChildren.firstWhereOrNull((childElem) => getChildrenOfMenuElement(childElem).contains(element));
+        if (parentElement != null) {
+          _removeActiveElement(parentElement);
+        }
+        _recursivelyDeactivateEveryChildOfElement(element);
         return;
       }
 
       if (element.childrenRef!.isNotEmpty) {
         HapticFeedback.mediumImpact();
 
-        _addActiveElement(element);
-        getChildrenOfMenuElement(element).forEach(_addActiveElement);
+        // Add the element itself, and then add the children
+        _recursivelyActivateEveryChildOfElement(element);
 
+        // This is done to bring the currently being selected element back into focus
+        // eg, if user is currenlty viewing "Cars" but decides to long select "Trucks"
+        // we will select trucks and bring it back into focus 
         _collapseAllOtherColumns(element);
         _renderChildrenOfElement(element);
       }
@@ -253,7 +292,6 @@ class _ScopeSelectorState extends State<ScopeSelector> {
     return Container(
       height: MediaQuery.of(context).size.height / 3,
       width: double.infinity,
-      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: Palette.offWhite100,
         border: Border.all(color: Palette.slate200, width: 1),

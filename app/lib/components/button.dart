@@ -44,6 +44,70 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
+class CustomOutlinedButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final double width;
+  final String text;
+  final bool isLoading;
+  final IconData? icon;
+
+  const CustomOutlinedButton({
+    super.key,
+    required this.width,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: Heights.xl,
+      child: OutlinedButton(
+        iconAlignment: IconAlignment.end,
+        onPressed: isLoading ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Palette.slate950),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.xl),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: Widths.lg,
+                height: Widths.lg,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Palette.slate950),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: FontSize.base,
+                        fontWeight: FontWeight.normal,
+                        color: Palette.slate950,
+                      ),
+                    ),
+                  ),
+                  if (icon != null) ...[
+                    Icon(icon, color: Palette.slate950),
+                  ],
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+
+
 class SquareIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;

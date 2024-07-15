@@ -1,4 +1,5 @@
 import 'package:app/services/token_service.dart';
+import 'package:app/utils/colors.dart';
 import 'package:app/views/announcement_create_view.dart';
 import 'package:app/views/announcement_list_view.dart';
 import 'package:app/views/login_view.dart';
@@ -25,7 +26,12 @@ class MyApp extends StatelessWidget {
       if (snapshot.connectionState == ConnectionState.done) {
         return MaterialApp(
           title: "Project CampusPilot",
-          theme: ThemeData(brightness: Brightness.light)
+          theme: ThemeData(brightness: Brightness.light, 
+          buttonTheme: ButtonThemeData(
+            splashColor: Palette.slate950,
+            highlightColor: Palette.slate950.withOpacity(0.8)
+          ),
+          )
               .copyWith(textTheme: GoogleFonts.poppinsTextTheme()),
           home: const AnnouncementCreateView(),
           debugShowCheckedModeBanner: true,
