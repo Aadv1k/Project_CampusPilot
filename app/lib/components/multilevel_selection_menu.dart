@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/services.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 
@@ -64,7 +63,8 @@ class MultiLevelSelectionMenu extends StatefulWidget {
       VoidCallback onTap,
       VoidCallback onLongPress,
       bool isActive,
-      bool noArrow
+      bool noArrow,
+      bool hasActiveChildren
     ) menuItemWidgetBuilder;
 
   final int hierarchyLevel;
@@ -224,7 +224,8 @@ class _MultiLevelSelectionMenuState extends State<MultiLevelSelectionMenu> {
         onTapAction,
         onLongPressAction,
         isActive,
-        !hasChildren
+        !hasChildren,
+        activeMenuChildren.any((activeElem) => children.contains(activeElem))
       );
   }
 

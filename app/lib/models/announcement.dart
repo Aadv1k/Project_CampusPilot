@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Announcement {
   String id;
   String title;
@@ -45,7 +47,7 @@ class AnnouncementScope {
   }
 
   @override
-  int get hashCode => hashValues(scopeContext, filterType, filterContent);
+  int get hashCode => Object.hash(scopeContext, filterType, filterContent);
 
   @override
   String toString() {

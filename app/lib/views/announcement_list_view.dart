@@ -105,8 +105,6 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
     final currentTime = DateTime.now();
 
     if (currentTime.difference(_lastInputTime) == const Duration(seconds: 2)) {
-      // TODO: get back to this 
-      print("Search: ${searchText}");
       setState(() {
         _lastInputTime = currentTime;
       });
@@ -130,7 +128,7 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
             
             // TODO: show search controls here as well, but that is too much work for now
             searchActive ?  Container(height: Heights.sm, decoration: const BoxDecoration(
-              color: Palette.offWhite100,
+              color: Palette.secondary,
               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40))
             ),) : const TabControl(),
             
@@ -168,7 +166,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       scrolledUnderElevation: 0.0,
-      backgroundColor: Palette.offWhite100,
+      backgroundColor: Palette.secondary,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: onBack,
@@ -198,7 +196,6 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: UserProfileButton(
             profileInitials: "AP",
             size: Widths.lg,
-            radius: Radii.md,
           ),
         ),
       ],
@@ -227,8 +224,8 @@ class SearchChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color? fillColor = isActive ? Palette.slate950 : Palette.offWhite100;
-    Color? textColor = isActive ? Palette.slate100 : Palette.slate950;
+    Color? fillColor = isActive ? Palette.primary : Palette.secondary;
+    Color? textColor = isActive ? Palette.slate100 : Palette.primary;
 
     return ActionChip(
       backgroundColor: fillColor,
@@ -264,7 +261,7 @@ class SearchControl extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.md),
       decoration: const BoxDecoration(
-        color: Palette.offWhite100,
+        color: Palette.secondary,
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(35), bottomRight: Radius.circular(35))
       ),
       child: const Row(children: [
@@ -370,7 +367,7 @@ class _SearchBarState extends State<SearchBar> {
       margin: widget.active ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Spacing.md),
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
       decoration: BoxDecoration(
-        color: Palette.offWhite100,
+        color: Palette.secondary,
         borderRadius: widget.active ? null : const BorderRadius.all(Radius.circular(Radii.xl)),
         border: !widget.active ? Border.all(color: Palette.slate200, width: 1.0) : null,
       ),

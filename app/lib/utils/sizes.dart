@@ -73,6 +73,7 @@ class Radii {
   static const double lg = 16.0;
   static const double xl = 24.0;
   static const double xxl = 32.0;
+  static const double full = 999.0;
 }
 
 class IconSizes {

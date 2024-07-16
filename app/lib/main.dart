@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
             highlightColor: Palette.slate950.withOpacity(0.8)
           ),
           )
-              .copyWith(textTheme: GoogleFonts.poppinsTextTheme()),
+              .copyWith(textTheme: GoogleFonts.interTextTheme()),
           home: const AnnouncementCreateView(),
           debugShowCheckedModeBanner: true,
         );
