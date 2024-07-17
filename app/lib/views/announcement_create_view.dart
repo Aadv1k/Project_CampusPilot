@@ -110,6 +110,12 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: Spacing.sm),
+            child: PrimaryButton(height: 40, width: 120, text: "Publish", onPressed: () { print("done"); },),
+          )
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -124,14 +130,31 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
                   maxLines: null,
                   controller: _titleController,
                   decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
                     border: InputBorder.none,
-                    hintStyle: TextStyle(fontSize: FontSize.xl, color: Palette.gray400, fontWeight: FontWeight.w900),
+                    hintStyle: TextStyle(fontSize: FontSize.lg, color: Palette.gray400, fontWeight: FontWeight.w900),
                     hintText: "Announcement Title"
                   ),
-                  style: const TextStyle(fontSize: FontSize.xl, color: Palette.heading, fontWeight: FontWeight.w900)
+                  style: const TextStyle(fontSize: FontSize.lg, color: Palette.heading, fontWeight: FontWeight.w900)
                 ),
                 const SizedBox(height: Spacing.md),
                 const Divider(height: 2.0, color: Palette.gray200),
+                const SizedBox(height: Spacing.md),
+                const Text("SELECT AUDIENCE",
+                    style: TextStyle(
+                        color: Palette.subtitle,
+                        fontSize: FontSize.sm,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: Spacing.md),
+                ScopeSelectorMenu(
+                    onChange: (data) {
+                      setState(() {
+                        _announcementScopes = data;
+                      });
+                    },
+                  ),
+
                 const SizedBox(height: Spacing.md),
                 if (teacherScopes.isNotEmpty)
                   ScopeSection(
@@ -144,33 +167,27 @@ class _AnnouncementCreateViewState extends State<AnnouncementCreateView> {
                     scopes: studentScopes,
                   ),
                 (teacherScopes.isNotEmpty || studentScopes.isNotEmpty ? SizedBox(height: Spacing.md) : SizedBox.shrink()),
-                SizedBox(
-                  width: 180,
-                  child: ElevatedButton(
-                    onPressed: () { _showScopeSelectionSheet(context); },
-                    style: ButtonStyle(
-                      backgroundColor: const WidgetStatePropertyAll(Palette.secondary),
-                      padding: const WidgetStatePropertyAll( EdgeInsets.symmetric(vertical: Spacing.xs, horizontal: Spacing.md)),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Radii.lg),
-                      ))
-                    ), 
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Add Audience", style: TextStyle(color: Palette.white, fontSize: FontSize.base)),
-                        SizedBox(width: Spacing.md),
-                        Icon(Icons.add, color: Palette.white, size: Widths.sm),
-                      ]
-                    ),
-                  )
-                ),
-                const SizedBox(height: Spacing.md),
                 const Divider(height: 2.0, color: Palette.gray200),
-                const SizedBox(height: Spacing.md),
               ],
             ),
-          )
+          ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Spacing.lg),
+                  child: TextField(
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      hintText: "eg \"This is an announcement regarding...\"",
+                      hintStyle: TextStyle(fontSize: FontSize.base, color: Palette.gray400),
+                    ),
+                    style: TextStyle(fontSize: FontSize.base, color: Palette.body)
+                  ),
+                ),
+  
+
         ],
       ),
     );
@@ -196,7 +213,8 @@ class ScopeSection extends StatelessWidget {
           runSpacing: Spacing.sm,
           children: scopes.map((scope) {
             return CustomChip(
-              text: scope.filterContent,
+              trailingIcon: const Icon(Icons.close, size: Widths.xs, color: Colors.black),
+              text: scope.filterContent ?? scope.scopeContext,
               variant: ChipVariant.filled,
               color: Palette.bgSecondary,
               textColor: Colors.black,

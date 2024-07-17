@@ -12,13 +12,13 @@ class Announcement {
 
 class AnnouncementScope {
   final String scopeContext;
-  final String filterType;
-  final String filterContent;
+  final String? filterType;
+  final String? filterContent;
 
   AnnouncementScope({
     required this.scopeContext,
-    required this.filterType,
-    required this.filterContent,
+    this.filterType,
+    this.filterContent,
   });
 
   factory AnnouncementScope.fromJson(Map<String, dynamic> json) {

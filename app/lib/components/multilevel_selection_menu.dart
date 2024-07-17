@@ -15,6 +15,54 @@ class MenuStructure {
   List<MenuStructure> children;
 }
 
+/*
+class MenuElement {
+  const MenuElement({
+    required this.id,
+    required this.label,
+  });
+
+  final String id;
+  final String label;
+
+  List<MenuElement> getChildrenOfElement(List<MenuElement> elements) {
+    return elements.where((elem) => elem.id.startsWith(this.id));
+  }
+
+}
+
+class MenuStructure {
+  MenuStructure({
+    required this.id,
+    required this.label,
+    this.children = const [],
+  });
+
+  String id;
+  String label ;
+  List<MenuStructure> children;
+}
+
+
+List<MenuElement> buildMenuElementTreeFromStructure(MenuStructure structure, String topLevelId) {`
+  List<MenuElement> builtElements = [];
+
+  final newId = "${topLevelId}.${structure.id}";
+
+  builElements.add(MenuElement(
+    id: newId,
+    label: structure.label
+  ))
+
+  for (var child in structure.children) {
+    builtElements.add(...buildMenuElementTreeFromStructure(child, newId));
+  }
+
+  return builtElements[];
+}
+*/
+
+/* TODO: rewrite to have a flat structure instead of a "nested" structure to simplify and make things better */
 class MenuElement {
   const MenuElement({
     required this.key,
@@ -51,6 +99,8 @@ class MultiLevelSelectionMenu extends StatefulWidget {
     this.menuColumnDecoration,
     this.menuBoxDecoration,
 
+    this.initiallyActiveKeys,
+
     this.height,
     this.width,
   });
@@ -66,6 +116,8 @@ class MultiLevelSelectionMenu extends StatefulWidget {
       bool noArrow,
       bool hasActiveChildren
     ) menuItemWidgetBuilder;
+
+  final List<String>? initiallyActiveKeys;
 
   final int hierarchyLevel;
   final double? height;
@@ -159,7 +211,9 @@ class _MultiLevelSelectionMenuState extends State<MultiLevelSelectionMenu> {
   Widget _buildMenuElementWidget(MenuElement element) {
     var children = getChildrenOfMenuElement(element);
     var hasChildren = children.isNotEmpty;
-    var isActive = activeMenuChildren.contains(element);
+
+    bool isActive = (widget.initiallyActiveKeys != null && widget.initiallyActiveKeys!.contains(element.key))
+        || activeMenuChildren.contains(element);
 
     onTapAction() {
       // If it has children, then it is a "level/sub-level" in this case
@@ -220,7 +274,7 @@ class _MultiLevelSelectionMenuState extends State<MultiLevelSelectionMenu> {
     }
 
       return widget.menuItemWidgetBuilder(
-        element.key,
+        element.value,
         onTapAction,
         onLongPressAction,
         isActive,
