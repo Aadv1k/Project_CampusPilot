@@ -24,7 +24,7 @@ class AnnouncementReadonlyView extends StatelessWidget {
             icon: const Icon(
               Icons.chevron_left_rounded,
               size: 32,
-              color: Palette.gray500,
+              color: Palette.slate500,
             ),
             onPressed: () {
               Navigator.pop(context);
@@ -47,19 +47,18 @@ class AnnouncementReadonlyView extends StatelessWidget {
                         textAlign: TextAlign.start,
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Palette.gray800)),
+                            color: Palette.slate950)),
                     const SizedBox(height: Spacing.sm),
                     Text(parseDateTimeToString(ann.postedAt),
                         style: const TextStyle(
-                            color: Palette.gray600,
-                            fontWeight: FontWeight.bold,
+                            color: Palette.slate600,
                             fontSize: FontSize.sm))
                   ],
                 ),
                 const SizedBox(height: Spacing.lg),
                 Text(ann.body,
                     style: const TextStyle(
-                        color: Palette.gray600, fontSize: FontSize.base))
+                        color: Palette.slate800, fontSize: FontSize.base))
               ],
             ),
           ),

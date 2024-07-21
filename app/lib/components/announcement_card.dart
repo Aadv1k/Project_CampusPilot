@@ -60,7 +60,7 @@ class AnnouncementCard extends StatelessWidget {
                   children: [
                     Text(authorName,
                         style: const TextStyle(
-                            fontSize: FontSize.sm, color: Palette.slate400)),
+                            fontSize: FontSize.sm, color: Palette.slate500)),
                     Text(extractHourAndMinute(postedAt),
                         style: const TextStyle(
                             fontSize: FontSize.sm,
@@ -85,7 +85,7 @@ class AnnouncementCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: Palette.slate600, fontSize: FontSize.base))
+                            color: Palette.slate700, fontSize: FontSize.base))
                   ],
                 )
               ],

@@ -17,15 +17,14 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final UserLoginDetails _userLoginDetails =
-      UserLoginDetails(CountryCode.INDIA, "");
+      UserLoginDetails("");
 
   bool hasError = false;
   String? errorMessage;
 
   void _handleVerifyTap() {
     setState(() {
-      if (!PhoneNumber.isValid(
-          _userLoginDetails.phoneCountryCode, _userLoginDetails.phoneNumber)) {
+      if (_userLoginDetails.phoneNumber.length != 10) {
         hasError = true;
         errorMessage = "Please enter a valid 10-digit phone number.";
       } else {
@@ -43,6 +42,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Palette.backgroundColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.lg),
         child: Column(
@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
               children: [
                 SizedBox(height: Spacing.lg),
                 Text(
-                  "Stay informed, engaged, and connected with your school",
+                  "Login",
                   style: TextStyle(
                       fontSize: FontSize.xl, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -72,11 +72,13 @@ class _LoginViewState extends State<LoginView> {
                   hasError: hasError,
                   errorMessage: errorMessage,
                 ),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: Spacing.sm),
                 PrimaryButton(
                   onPressed: _handleVerifyTap,
                   width: double.infinity,
                   text: "Sign in",
+									radius: Radii.xl,
+									height: Heights.xxl
                 ),
                 const SizedBox(height: Spacing.sm),
                 MailtoLink(

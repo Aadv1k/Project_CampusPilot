@@ -1,5 +1,3 @@
-import 'package:app/common/phone_number.dart';
-
 class UserModel {
   final String userId;
   final String fullName;
@@ -12,8 +10,7 @@ class UserModel {
 }
 
 class UserLoginDetails {
-  CountryCode phoneCountryCode;
   String phoneNumber;
 
-  UserLoginDetails(this.phoneCountryCode, this.phoneNumber);
+  UserLoginDetails(this.phoneNumber);
 }

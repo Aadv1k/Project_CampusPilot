@@ -36,15 +36,19 @@ class Palette {
 
   static const Color lightBlue = Color(0xFFB1AFFF);
 
-  static const Color primary = Color(0xFF121315);
-  static const Color secondary = Color(0xFF7068d6);
+  static const Color primary = Color(0xFF0C1619);
+  static const Color secondary = Palette.slate100;
+
+  static const Color backgroundColor = Color(0xFFF6F5F8);
+
 
   static const Color accentLight = Color(0xFFe2e1f7);
 
   static const Color danger = Color(0xFFef4444);
   static const Color bgDanger = Color(0xFFfca5a5);
 
-  static const Color bgSecondary = Color(0xFFE2E8F0);
+  static const Color bgSecondary = Color(0xFFD6E7EB);
+
   static const Color divider = Color(0xFFe5e7eb);
   
 

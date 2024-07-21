@@ -57,7 +57,7 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
   }
 
   void _handleOtpSubmit(String otpStr) {
-    if (this._otp.isEmpty) {
+    if (_otp.isEmpty) {
       setState(() {
         hasError = true;
         errorMessage = "Please enter your OTP before proceeding";
@@ -138,14 +138,13 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
                   },
                   borderColor: Colors.transparent,
                   enabledBorderColor: Palette.slate200,
-                  focusedBorderColor: Palette.slate950,
-                  disabledBorderColor: Palette.gray200,
+                  focusedBorderColor: Palette.primary,
                   filled: true,
-                  fillColor: Palette.slate200,
+                  fillColor: Palette.bgSecondary,
                   textStyle: const TextStyle(
                     fontSize: FontSize.lg,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.slate500,
+                    fontWeight: FontWeight.normal,
+                    color: Palette.slate800,
                   ),
                   enabled: !_otpLoading,
                 ),
@@ -173,6 +172,8 @@ class _OtpVerifyViewState extends State<OtpVerifyView> {
                   width: double.infinity,
                   text: "Continue",
                   onPressed: () => _handleOtpSubmit(_otp),
+									radius: Radii.xl,
+									height: Heights.xxl,
                   isLoading: _otpLoading,
                 ),
                 if (hasError) const SizedBox(height: Spacing.md),
