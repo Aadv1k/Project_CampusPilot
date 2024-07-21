@@ -27,7 +27,7 @@ class Class(models.Model):
     def validate_standard_division_format(inp: str) -> bool:
         std, div = Class.extract_standard_and_division_from_str(inp)
 
-        return (std.length <= 2 and div.length == 1) and (std.isdigit() and int(std) <= 12) and (div in "abcdefghijklmnopqrstuvwxyz") 
+        return (len(std) <= 2 and len(div) == 1) and (std.isdigit() and int(std) <= 12) and (div in "abcdefghijklmnopqrstuvwxyz") 
 
 
     def save(self, *args, **kwargs):

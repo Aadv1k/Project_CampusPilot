@@ -75,3 +75,35 @@ class AnnouncementsViewset(viewsets.ViewSet):
 
         except Announcement.DoesNotExist:
             raise HTTPNotFound("Announcement with that ID wasn't found in your school")
+
+class MyAnnouncementsViewset(viewsets.ViewSet):
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated, IsPartOfSchool]
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes += [CanViewAnnouncements]
+        return [permission() for permission in permission_classes]
+
+    def list(self, request, school_id=None):
+        user_announcements = Announcement.objects.filter(
+            announcer__id=request.user.id,
+            announcer__school__id=school_id
+        )
+
+        serializer = AnnouncementSerializer(
+            user_announcements,
+            many=True
+        )
+
+        return Response({
+            "message": "Fetched your announcements",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, school_id=None, announcement_id=None):
+        try:
+            announcement = Announcement.objects.get(id=announcement_id, announcer__id=request.user.id, announcer__school__id=school_id)
+            return Response({
+                "data": AnnouncementOutputSerializer(announcement).data
+            }, status=status.HTTP_200_OK)
+        except Announcement.DoesNotExist:
+            raise HTTPNotFound("Announcement with that ID wasn't found in your school")

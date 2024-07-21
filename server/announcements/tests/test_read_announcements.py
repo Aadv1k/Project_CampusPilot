@@ -9,7 +9,7 @@ from services.TokenManager import TokenManager, UserTokenPayload
 from announcements.models import AnnouncementScope, Announcement
 from announcements.serializers import AnnouncementSerializer
 
-class AnnouncementCRUDTests(TestCase):
+class ReadAnnouncementsTest(TestCase):
     def setUp(self):
         call_command("loaddata", "initial_classes")
 
@@ -181,3 +181,15 @@ class AnnouncementCRUDTests(TestCase):
         response = self.client.get(reverse("announcement", kwargs={"school_id": self.school.id, "announcement_id": 1}))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_teacher_can_list_announcements_by_them(self):
+        self.create_announcements(self.teacher, 10, title="Announcement BY TEACHER", scope_context="student", filter_type="standard", filter_content="9")
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_token)
+        response = self.client.get(reverse("my_announcement_list", kwargs={"school_id": self.school.id }))
+
+        self.assertEqual(len(response.data["data"]), 10)
+
+        response = self.client.get(reverse("announcements", kwargs={"school_id": self.school.id }))
+
+        self.assertNotEqual(len(response.data["data"]), 10)
