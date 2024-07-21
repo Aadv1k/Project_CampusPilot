@@ -3,12 +3,13 @@ import random
 from datetime import timedelta, datetime
 from typing import Tuple
 
-from .KeyValueStore import KeyValueStore, kv_store
+from .messaging_service import messaging_service
+from .key_value_store import KeyValueStore, kv_store_factory
 
 class OTPManager:
-    def __init__(self, kv_store: KeyValueStore):
+    def __init__(self, kv_store: KeyValueStore, expiry: timedelta = timedelta(minutes=2)):
         self.kv_store = kv_store
-        self.expiry = timedelta(minutes=2)
+        self.expiry = expiry
     
     def generate_otp(self, length: int = 6) -> str:
         return ''.join(random.choices('0123456789', k=length))
@@ -38,4 +39,23 @@ class OTPManager:
     def _parse_stored_value(self, value: str) -> Tuple[str, str]:
         return value.split(':')
 
+# Assuming you have a configuration to select the kv store type
+kv_store_type = 'memory'  # or 'redis'
+kv_store = kv_store_factory(kv_store_type)
+
 otp_manager = OTPManager(kv_store)
+
+class OTPService:
+    def __init__(self, otp_manager: OTPManager):
+        self.otp_manager = otp_manager
+
+    def send_otp(self, phone_number: str):
+        otp = self.otp_manager.generate_otp()
+        self.otp_manager.store_otp(phone_number, otp)
+
+        messaging_service.send_message(phone_number, f"CampusPilot: your otp is {otp}")
+
+    def verify_otp(self, phone_number: str, otp: str) -> bool:
+        return self.otp_manager.verify_otp(phone_number, otp)
+    
+otp_service = OTPService(otp_manager)

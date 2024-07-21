@@ -1,6 +1,5 @@
 from users.models import User, StudentDetail, TeacherDetail
 from classes.models import Class
-from schools.models import School
 from announcements.models import AnnouncementScope, Announcement
 
 from django.urls import reverse

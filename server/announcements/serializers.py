@@ -2,12 +2,14 @@ from rest_framework import serializers
 from .models import Announcement, AnnouncementScope, Attachment
 from classes.models import Class 
 from users.models import User
+
+from users.serializers import UserSerializer
+
 import re
 
 import services.utils as utils
 
-from typing import NamedTuple, Callable, Optional
-
+from typing import NamedTuple, Callable, Optional, Tuple
 
 class ScopeValidationRule(NamedTuple):
     context: str
@@ -22,31 +24,24 @@ scope_validation_rules = [
         validator=lambda content: content.isdigit() and Class.objects.filter(standard=content).exists(),
         message="The standard does not exist."
     ),
-
     ScopeValidationRule(
         context=AnnouncementScope.ScopeContextChoices.student.value,
         filter_type=AnnouncementScope.ScopeFilterChoices.standard_division.value,
-        validator=lambda content: utils.is_std_div_valid(content) and 
+        validator=lambda content: Class.validate_standard_division_format(content) and
             Class.objects.filter(
-                standard=utils.extract_std_div_from_str(content)[0], 
-                division=utils.extract_std_div_from_str(content)[1]
+                standard=Class.extract_standard_and_division_from_str(content)[0], 
+                division=Class.extract_standard_and_division_from_str(content)[1], 
             ).exists(),
         message="Either the std-div format is invalid; or std / div doesn't exist."
     ),
 ]
 
-# Custom field for lowercase conversion
 class LowercaseCharField(serializers.CharField):
     def to_internal_value(self, data):
         return super().to_internal_value(data).lower()
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter_content = LowercaseCharField(required=False, allow_blank=True)
-
-    def to_internal_value(self, data):
-        if 'filter_content' in data:
-            data['filter_content'] = data['filter_content'].lower()
-        return super().to_internal_value(data)
 
     def validate(self, data):
         scope_context = data.get('scope_context')
@@ -58,7 +53,7 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
     
         for rule in scope_validation_rules:
             if rule.context == scope_context and rule.filter_type == filter_type:
-                if not rule.validator(filter_content):  # No need to call .lower() here as it's already lowercase
+                if not rule.validator(filter_content):
                     raise serializers.ValidationError(rule.message or f"Invalid filter content for {filter_type}")
                 return data
 
@@ -66,7 +61,15 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnnouncementScope
-        exclude = ["announcement"]
+        exclude = ["announcement", "id"]
+
+class AnnouncementOutputSerializer(serializers.ModelSerializer):
+    announcer = UserSerializer()
+
+    class Meta:
+        model = Announcement
+        exclude = ["id"]
+        
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     scope = AnnouncementScopeSerializer(many=True, required=True)
@@ -74,32 +77,29 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         return super().validate(attrs)
 
-    def validate_scope(self, scope_data):
-        if not scope_data or len(scope_data) == 0:
+    def validate_scope(self, scope):
+        if not scope or len(scope) == 0:
             raise serializers.ValidationError("Announcements must have at least one scope")
 
         has_all_scope = False
         classroom_standards = []
-        for scope in scope_data:
-            if scope.get("scope_context") == AnnouncementScope.ScopeContextChoices.all:
-                has_all_scope = True
+
+        for scope_item in scope:
+            AnnouncementScopeSerializer(data=scope_item).is_valid(raise_exception=True)
+            if scope_item.get("scope_context") == AnnouncementScope.ScopeContextChoices.all:
                 break
 
-            if scope.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard_division:
-                std, div = utils.extract_std_div_from_str(scope.get("filter_content"))
+            if scope_item.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard_division:
+                std, _ = Class.extract_standard_and_division_from_str(scope_item.get("filter_content"))
                 classroom_standards.append(std)
 
-            if scope.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard and scope.get("filter_content") in classroom_standards:
-                raise serializers.ValidationError("When a standard scope is provided, standard_division scopes can't be passed")
-                break
+            if scope_item.get("filter_type") == AnnouncementScope.ScopeFilterChoices.standard and scope_item.get("filter_content") in classroom_standards:
+                raise serializers.ValidationError("When a standard scope is provided, standard_division scope of the same standard can't be passed")
 
-        if has_all_scope and len(scope_data) > 1:
+        if has_all_scope and len(scope) > 1:
             raise serializers.ValidationError("If 'all' scope is included, no other scopes can be set.")
-        
-        for scope in scope_data:
-            AnnouncementScopeSerializer(data=scope).is_valid(raise_exception=True)
 
-        return scope_data
+        return scope
     
     def create(self, validated_data):
         announcement = Announcement.objects.create(

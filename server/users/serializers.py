@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
-from .models import UserContact, School
+from .models import UserContact, School, User
 
-from services.OTPManager import otp_manager
+from services.otp_service import otp_manager
 
 class NormalizedPhoneNumberField(serializers.CharField):
     VALID_COUNTRY_CODE = '+91'
@@ -28,6 +28,11 @@ class NormalizedPhoneNumberField(serializers.CharField):
             raise serializers.ValidationError("Phone number must be exactly 10 digits long")
 
         return f"{self.VALID_COUNTRY_CODE}{phone_number}"
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ["school"]
 
 class UserLoginSerializer(serializers.Serializer):
     school_id = serializers.IntegerField()

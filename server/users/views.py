@@ -2,9 +2,6 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.conf import settings
-
-from services.SMSService import SMSService
 from services.TokenManager import TokenManager, UserTokenPayload
 
 from .serializers import UserVerificationSerializer, UserLoginSerializer
@@ -13,9 +10,7 @@ from api.exceptions import HTTPSerializerBadRequest, HTTPBadRequest, HTTPInterna
 
 from .throttling import OTPRequestThrottle, DisableThrottle
 
-from services.OTPManager import otp_manager
-
-sms_service = SMSService()
+from services.otp_service import otp_service
 
 @api_view(['POST'])
 def user_login(request, school_id=None):
@@ -28,8 +23,8 @@ def user_login(request, school_id=None):
         raise HTTPSerializerBadRequest(details=serializer.errors)
     
     phone_number = serializer.validated_data["phone_number"]
-    otp = otp_manager.generate_otp()
-    otp_manager.store_otp(phone_number, otp)
+    
+    otp_service.send_otp(phone_number)
     
     return Response({"message": f"Sent an OTP to the provided mobile number."}, status=status.HTTP_200_OK)
 
@@ -43,12 +38,13 @@ def user_verify(request, school_id=None):
     phone_number = serializer.validated_data.get("phone_number")
     otp = serializer.validated_data.get("otp")
 
-    if not otp_manager.verify_otp(phone_number, otp):
+    if not otp_service.verify_otp(phone_number, otp):
         raise HTTPBadRequest(message="Invalid OTP or OTP has expired")
 
     user_contact = UserContact.objects.filter(
         user__school_id=school_id,
         contact_data=phone_number,
+        contact_type=UserContact.ContactType.PRIMARY
     ).first()
 
     if not user_contact:

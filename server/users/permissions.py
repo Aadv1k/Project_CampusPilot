@@ -17,7 +17,7 @@ def extract_auth_token_or_fail(request):
     return auth[1]
 
 class IsAuthenticated(permissions.BasePermission):
-    def has_permission(self, request):
+    def has_permission(self, request, view):
         try:
             auth_token = extract_auth_token_or_fail(request)
         except exceptions.AuthenticationFailed:
@@ -30,21 +30,26 @@ class IsAuthenticated(permissions.BasePermission):
 
         return True
 
-class IsMember(permissions.BasePermission):
+class IsPartOfSchool(permissions.BasePermission):
     def has_permission(self, request, view):
         school_id = view.kwargs.get("school_id")
-        return School.objects.filter(id=school_id).exists()
+        found_school = School.objects.filter(id=school_id)
+
+        if not found_school.exists():
+            return False
+        
+        return found_school.first().people.filter(id=request.user.id).exists()
 
     def has_object_permission(self, request, view, school):
         return User.objects.filter(id=request.user.id, school=school).exists()
 
 class CanViewAnnouncements(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.user_type in { User.UserType.teacher, User.UserType.admin, User.UserType.student }
+        return request.user.user_type in { User.UserType.TEACHER, User.UserType.ADMIN, User.UserType.STUDENT }
 
 class CanModifyAnnouncements(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.user_type in { User.UserType.teacher, User.UserType.admin }
+        return request.user.user_type in { User.UserType.TEACHER, User.UserType.ADMIN }
     
     def has_object_permission(self, request, view, obj):
         return obj.announcer == request.user

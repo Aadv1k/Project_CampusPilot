@@ -30,6 +30,10 @@ class User(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} -- {self.user_type}"
 
+    # This is an artefact of how django works
+    def is_authenticated():
+        return True
+
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"

@@ -2,33 +2,47 @@ from django.db import models
 
 from users.models import User
 
+from classes.models import Class
+
 class Announcement(models.Model):
     announcer = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
-    def user_in_scope(self, user: User) -> bool:
-        for scope in self.scope:
-            if scope.scope_context == AnnouncementScope.ScopeContextChoices.teacher and user.user_type == User.UserType.teacher:
-                assert("Teacher Scope logic not implemented")
+    def for_user(self, user: User) -> bool:
+        for scope in self.scope.all():
+            if scope.scope_context == AnnouncementScope.ScopeContextChoices.student:
+                if user.user_type in {User.UserType.TEACHER, User.UserType.ADMIN}:
+                    return True
 
-            # TODO: this needs to change massively
-            if scope.scope_context == AnnouncementScope.ScopeContextChoices.student and user.user_type == User.UserType.student:
+                if not user.student_detail.student_class:
+                    return False
+
                 if scope.filter_type == AnnouncementScope.ScopeFilterChoices.standard:
-                    if user.student_class.classroom.standard == scope.filter_content:
-                        return True 
-                if scope.filter_type == AnnouncementScope.ScopeFilterChoices.standard_division:
-                    # NOTE: this is validated during serialization
-                    std, div = utils.extract_std_div_from_str(scope.filter_content)
-                    if user.student_class.classroom.standard == std and user.student_class.classroom.division == div:
-                        return True 
+                    if user.student_detail.student_class.standard == int(scope.filter_content):
+                        return True
 
-            # standard, standard_division
+                elif scope.filter_type == AnnouncementScope.ScopeFilterChoices.standard_division:
+                    if Class.get_class_by_standard_division(scope.filter_content) == user.student_detail.student_class:
+                        return True
+
+                return False
+
+            elif scope.scope_context == AnnouncementScope.ScopeContextChoices.teacher:
+                if user.user_type not in {User.UserType.TEACHER, User.UserType.ADMIN}:
+                    return False
+                # Implement teacher-specific logic here
+                assert False, "Teacher-specific implementation needed"
+
+            elif scope.scope_context == AnnouncementScope.ScopeContextChoices.all:
+                return True
 
         return False
+
 
     class Meta:
         verbose_name = "Announcement"

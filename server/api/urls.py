@@ -1,7 +1,7 @@
 from django.urls import path
 
 from users.views import user_login, user_verify
-from users.permissions import IsAuthenticated, IsMember
+from users.permissions import IsAuthenticated, IsPartOfSchool
 
 from announcements.views import AnnouncementsViewset
 
@@ -12,11 +12,10 @@ urlpatterns = [
     path("<int:school_id>/announcements/", AnnouncementsViewset.as_view({
         'get': 'list',
         'post': 'create',
-    }), name="announcement_list"),
+    }), name="announcements"),
 
-    path("<int:school_id>/announcements/<int:pk>/", AnnouncementsViewset.as_view({
+    path("<int:school_id>/announcements/<int:announcement_id>", AnnouncementsViewset.as_view({
         'get': 'retrieve',
-        'put': 'update',
-        'delete': 'destroy',
-    }), name="announcement_detail"),
+    }), name="announcement"),
+
 ]

@@ -2,105 +2,76 @@ from rest_framework import viewsets, pagination, status
 from rest_framework.response import Response
 from users.permissions import (
     IsAuthenticated,
-    IsMember,
+    IsPartOfSchool,
     CanModifyAnnouncements,
+    CanViewAnnouncements
 )
-from .serializers import AnnouncementSerializer
-from api.exceptions import HTTPSerializerBadRequest, HTTPForbidden
+from .serializers import AnnouncementOutputSerializer, AnnouncementSerializer
+from api.exceptions import HTTPSerializerBadRequest, HTTPForbidden, HTTPNotFound
 from .models import Announcement, AnnouncementScope
 from users.models import User
 
-from services.AnnouncementQueue import ann_queue
-
-import copy
+from django.db.models import Q
 
 class AnnouncementsViewset(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated, IsMember]
 
+# https://www.django-rest-framework.org/api-guide/viewsets/#introspecting-viewset-actions
     def get_permissions(self):
-        permission_classes = self.permission_classes
-        if self.action == "create" or self.action == "destroy":
+        permission_classes = [IsAuthenticated, IsPartOfSchool]
+        if self.action == 'create':
             permission_classes += [CanModifyAnnouncements]
+        if self.action == 'list':
+            permission_classes += [CanViewAnnouncements]
         return [permission() for permission in permission_classes]
 
-    def list(self, request, school_id):
-        current_user = request.user
-        announcements = Announcement.objects.filter(announcer__school__id=school_id)
+    def list(self, request, school_id=None):
+        filtered_announcements = [
+            announcement for announcement in Announcement.objects.filter(
+                ~Q(announcer__id=request.user.id),
+                announcer__school__id=school_id
+            ) if announcement.for_user(request.user)
+        ]
 
-        filtered_announcements = []
-        for announcement in announcements:
-            if self.check_announcement_scope(announcement, current_user):
-                filtered_announcements.append(announcement)
+        serializer = AnnouncementSerializer(
+            data=filtered_announcements,
+            many=True
+        )
 
-        paginator = pagination.PageNumberPagination()
-        paginator.page_size = 10
-        result_page = paginator.paginate_queryset(filtered_announcements, request)
+        serializer.is_valid()
 
-        serializer = AnnouncementSerializer(result_page, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        return Response({
+            "message": "Fetched the announcements",
+            "data": list(serializer.data)
+        }, status=status.HTTP_200_OK)
+        
 
-    def create(self, request, school_id):
-        data = copy.deepcopy(request.data)
-        data["announcer"] = request.user.id
-        serializer = AnnouncementSerializer(data=data)
-        if serializer.is_valid():
-            ann = serializer.save()
-
-            ann_queue.queue_announcement(ann.id)
-
-            return Response(
-                serializer.data, 
-                status=status.HTTP_201_CREATED
-            )
-        else:
+    def create(self, request, school_id=None):
+        serializer = AnnouncementSerializer(data={
+            "announcer": request.user.id,
+            **{ k: v for k,v in request.data.items()}
+        })
+        if not serializer.is_valid():
             raise HTTPSerializerBadRequest(details=serializer.errors)
 
-    def retrieve(self, request, pk, school_id):
-        announcement = Announcement.objects.get(ann_id=pk, ann_school_id=school_id)
-        serializer = AnnouncementSerializer(announcement)
-        return Response(serializer.data)
+        serializer.save()
 
-    def update(self, request,  pk, school_id=None):
-        announcement = Announcement.objects.get(id=pk)
-        data = copy.deepcopy(request.data)
-        serializer = AnnouncementSerializer(announcement, data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            raise HTTPSerializerBadRequest(details=serializer.errors)
+        return Response({
+            "message": "Created a new announcement mate!",
+            "data": {
+                "title": serializer.validated_data["title"],
+                "body": serializer.validated_data["body"],
+            }
+        }, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, pk, school_id):
+    def retrieve(self, request, school_id=None, announcement_id=None):
         try:
-            announcement = Announcement.objects.get(id=pk)
+            
+            announcement = Announcement.objects.get(id=announcement_id, announcer__school__id=school_id)
+            if not announcement.for_user(request.user):
+                raise HTTPForbidden("This announcement can't be viewed by you")
+            return Response({
+                "data": AnnouncementOutputSerializer(announcement).data
+            }, status=status.HTTP_200_OK)
+
         except Announcement.DoesNotExist:
-            raise HTTPSerializerBadRequest(details={"message": f"Announcement with id {pk} does not exist."})
-
-        if announcement.announcer != request.user and not request.user.user_type == User.UserType.admin:
-            raise HTTPForbidden(message="The announcement you are trying to delete does not belong to you", details={"message": f"id {pk}"})
-
-        announcement.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def check_announcement_scope(self, announcement, user):
-        for scope in announcement.scope.all():
-            scope_type = scope.scope_context
-            filter_content = scope.filter_content
-            if scope_type == "student":
-                if str(user.id) == filter_content:
-                    return True
-            elif scope_type == "teacher":
-                if str(user.id) == filter_content:
-                    return True
-            elif scope_type == "all":
-                return True
-            elif scope_type == "standard":
-                if str(user.standard) == filter_content:
-                    return True
-            elif scope_type == "division":
-                if str(user.division) == filter_content:
-                    return True
-            elif scope_type == "subject":
-                if str(user.subject) == filter_content:
-                    return True
-        return False
+            raise HTTPNotFound("Announcement with that ID wasn't found in your school")
