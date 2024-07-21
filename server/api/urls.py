@@ -6,8 +6,8 @@ from users.permissions import IsAuthenticated, IsMember
 from announcements.views import AnnouncementsViewset
 
 urlpatterns = [
-    path("users/login", view=user_login, name="user_login"),
-    path("users/otp_verify", view=user_verify, name="user_otp_verify"),
+    path("<int:school_id>/users/login", view=user_login, name="user_login"),
+    path("<int:school_id>/users/verify", view=user_verify, name="user_verify"),
 
     path("<int:school_id>/announcements/", AnnouncementsViewset.as_view({
         'get': 'list',

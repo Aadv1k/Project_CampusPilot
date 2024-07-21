@@ -1,93 +1,59 @@
 from rest_framework import serializers
-from datetime import datetime, timedelta
-from utils.OTPManager import otp_manager
+from django.core.validators import RegexValidator
+from .models import UserContact, School
 
-from .models import UserContact
+from services.OTPManager import otp_manager
+
+class NormalizedPhoneNumberField(serializers.CharField):
+    VALID_COUNTRY_CODE = '+91'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.validators.append(RegexValidator(
+            regex=r'^(\+91|91)?\d{10}$',
+            message="Phone number must be a valid 10-digit number with optional +91 prefix"
+        ))
+
+    def to_internal_value(self, data):
+        cleaned_data = ''.join(filter(lambda x: x.isdigit() or x == '+', data))
+
+        if cleaned_data.startswith(self.VALID_COUNTRY_CODE):
+            phone_number = cleaned_data[3:]
+        elif cleaned_data.startswith('91'):
+            phone_number = cleaned_data[2:]
+        else:
+            phone_number = cleaned_data
+
+        if len(phone_number) != 10:
+            raise serializers.ValidationError("Phone number must be exactly 10 digits long")
+
+        return f"{self.VALID_COUNTRY_CODE}{phone_number}"
 
 class UserLoginSerializer(serializers.Serializer):
-    """
-    Serializer for user login data.
-
-    Fields:
-    - phone_number: CharField with max length 15, required.
-    - country_code: CharField with max length 3, required.
-    - device_token: CharField with max length 255, optional and allow blank.
-
-    Validation:
-    - phone_number: Must contain only digits.
-    """
-
-    phone_number = serializers.CharField(max_length=15, required=True)
-    country_code = serializers.CharField(max_length=3, required=True)
-    device_token = serializers.CharField(max_length=255, required=False, allow_blank=True)
-
-    def validate_phone_number(self, value):
-        """
-        Validate that phone_number contains only digits.
-        """
-        if not value.isdigit():
-            raise serializers.ValidationError("Phone number must contain only digits.")
-        return value
+    school_id = serializers.IntegerField()
+    phone_number = NormalizedPhoneNumberField()
 
     def validate(self, data):
-        """
-        Check if the phone number with the country code exists.
-        """
+        school_id = data.get('school_id')
         phone_number = data.get('phone_number')
-        country_code = data.get('country_code')
-        
-        if not UserContact.objects.filter(phone_number=phone_number, country_code=country_code).exists():
-            raise serializers.ValidationError("The phone number with the specified country code does not exist.")
-        
+
+        if not School.objects.filter(id=school_id).exists():
+            raise serializers.ValidationError("Invalid school ID.")
+
+        if not UserContact.objects.filter(user__school_id=school_id,
+            contact_type=UserContact.ContactType.PRIMARY,
+            contact_format=UserContact.ContactFormat.PHONE_NUMBER,
+            contact_data=phone_number
+        ).exists():
+            raise serializers.ValidationError("The phone number does not exist for the specified school.")
+
         return data
 
-
 class UserVerificationSerializer(serializers.Serializer):
-    """
-    Serializer for user OTP verification.
-
-    Fields:
-    - phone_number: CharField with max length 15, required.
-    - country_code: CharField with max length 3, required.
-    - otp: CharField for OTP verification, required.
-
-    Validation:
-    - phone_number: Must contain only digits.
-    - otp: Must be a string with a length of 6 characters.
-    """
-
-    country_code = serializers.CharField(max_length=3, required=True)
-    phone_number = serializers.CharField(max_length=15, required=True)
+    phone_number = NormalizedPhoneNumberField(max_length=15, required=True)
     otp = serializers.CharField(required=True)
 
-    def validate_phone_number(self, value):
-        """
-        Validate that phone_number contains only digits.
-        """
-        if not value.isdigit():
-            raise serializers.ValidationError("Phone number must contain only digits.")
-        return value
-
     def validate_otp(self, value):
-        """
-        Validate OTP format (exactly 6 characters).
-        """
         if len(value) != 6 or not value.isdigit():
             raise serializers.ValidationError("OTP must be a 6-digit number.")
         return value
-
-    def validate(self, data):
-        """
-        Validate the OTP against stored OTP in memory store.
-        """
-        received_otp = data['otp']
-
-        full_phone_number = f"{data['country_code']}{data['phone_number']}"
-
-
-        if not otp_manager.is_otp_valid(full_phone_number, received_otp):
-            raise serializers.ValidationError("Sorry, the OTP you provided wasn't valid. Please try again later.")
-
-        otp_manager.delete_otp(full_phone_number)
-
-        return data

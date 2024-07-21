@@ -1,72 +1,87 @@
 from rest_framework.test import APIRequestFactory
 from django.test import TestCase
-from schools.models import School 
-from users.models import User, UserContact
-from utils.OTPManager import otp_manager
-from utils.TokenManager import TokenManager, UserTokenPayload
+from users.models import User, UserContact, School
+from services.OTPManager import otp_manager
+from services.TokenManager import TokenManager, UserTokenPayload
 from rest_framework.test import APIClient
 from django.urls import reverse
 
-MOCK_PHONE = "1234567890"
-MOCK_COUNTRY_CODE = "91"
+MOCK_PHONE_NUMBER = "+917555750826"
+MOCK_PHONE_NUMBER_2 = "+918555750811"
 
 class UserTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        school = School.objects.create(
+        self.school = School.objects.create(
             name="Jethalal Public School",
-            email="contact@jethalal.edu",
         )
         user = User.objects.create(
-            school=school,
+            school=self.school,
             first_name="Robin",
             last_name="Sharma",
-            user_type=User.UserType.student,
+            user_type=User.UserType.STUDENT,
         )
         UserContact.objects.create(
             user=user,
-            country_code=MOCK_COUNTRY_CODE,
-            phone_number=MOCK_PHONE,
-            email="foo@example.org",
-            relation_type=UserContact.RelationTypeChoices.PRIMARY,
+            contact_type=UserContact.ContactType.PRIMARY,
+            contact_format=UserContact.ContactFormat.PHONE_NUMBER,
+            contact_description="primary",
+            contact_data=MOCK_PHONE_NUMBER,
+        )
+        user2 = User.objects.create(
+            school=self.school,
+            first_name="Mr",
+            last_name="India",
+            user_type=User.UserType.STUDENT,
+        )
+        UserContact.objects.create(
+            user=user2,
+            contact_type=UserContact.ContactType.PRIMARY,
+            contact_format=UserContact.ContactFormat.PHONE_NUMBER,
+            contact_data=MOCK_PHONE_NUMBER_2,
         )
         self.user = user
+        self.user2 = user2
 
     def test_user_bad_login(self):
-        response = self.client.post(reverse("user_login"), {
+        response = self.client.post(reverse("user_login", kwargs={"school_id":self.school.id}), {
             "phone_number": "29ihehbwhbeb",
-            "country_code": "2292"
         })
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data["error"]["details"]["phone_number"])
-        self.assertIsNotNone(response.data["error"]["details"]["country_code"])
 
     def test_non_existent_user_login(self):
-        response = self.client.post(reverse("user_login"), {
-            "phone_number": "1800801920",
-            "country_code": "44"
+        response = self.client.post(reverse("user_login", kwargs={"school_id":self.school.id}), {
+            "phone_number": "+910000000000",
         })
         self.assertEqual(response.status_code, 400)
 
     def test_successful_login(self):
-        response = self.client.post(reverse("user_login"), {
-            "phone_number": MOCK_PHONE,
-            "country_code": MOCK_COUNTRY_CODE
+        response = self.client.post(reverse("user_login", kwargs={"school_id":self.school.id}), {
+            "phone_number": MOCK_PHONE_NUMBER,
         })
         self.assertEqual(response.status_code, 200)
 
-    def test_otp_verification(self):
-        response = self.client.post(reverse("user_login"), {
-            "phone_number": MOCK_PHONE,
-            "country_code": MOCK_COUNTRY_CODE
+    def test_otp_is_generated(self):
+        response = self.client.post(reverse("user_login", kwargs={"school_id":self.school.id}), {
+            "phone_number": MOCK_PHONE_NUMBER_2,
         })
-        stored_otp = otp_manager.get_otp(f"{MOCK_COUNTRY_CODE}{MOCK_PHONE}")
-        response = self.client.post(reverse("user_otp_verify"), {
-            "phone_number": MOCK_PHONE,
-            "country_code": MOCK_COUNTRY_CODE,
-            "otp": stored_otp
+
+        stored_otp, _ = otp_manager.kv_store.get(MOCK_PHONE_NUMBER_2).split(":")
+        self.assertTrue(otp_manager.verify_otp(MOCK_PHONE_NUMBER_2, stored_otp))
+
+    def test_otp_is_verified(self):
+        response = self.client.post(reverse("user_login", kwargs={"school_id":self.school.id}), {
+            "phone_number": MOCK_PHONE_NUMBER_2,
         })
+
         self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.data.get("access_token"))
-        payload = TokenManager.decode_token(response.data.get("access_token"))
-        self.assertEqual(payload.user_name, "Robin Sharma")
+
+        otp, _ = otp_manager.kv_store.get(MOCK_PHONE_NUMBER_2).split(":")
+
+        response = self.client.post(reverse("user_verify", kwargs={"school_id":self.school.id}), {
+            "phone_number": MOCK_PHONE_NUMBER_2,
+            "otp": otp
+        })
+
+        self.assertEqual(response.status_code, 200)

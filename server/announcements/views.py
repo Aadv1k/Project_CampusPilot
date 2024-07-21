@@ -3,14 +3,14 @@ from rest_framework.response import Response
 from users.permissions import (
     IsAuthenticated,
     IsMember,
-    ModifyAnnouncement,
+    CanModifyAnnouncements,
 )
 from .serializers import AnnouncementSerializer
 from api.exceptions import HTTPSerializerBadRequest, HTTPForbidden
 from .models import Announcement, AnnouncementScope
 from users.models import User
 
-from utils.AnnouncementQueue import ann_queue
+from services.AnnouncementQueue import ann_queue
 
 import copy
 
@@ -20,7 +20,7 @@ class AnnouncementsViewset(viewsets.ViewSet):
     def get_permissions(self):
         permission_classes = self.permission_classes
         if self.action == "create" or self.action == "destroy":
-            permission_classes += [ModifyAnnouncement]
+            permission_classes += [CanModifyAnnouncements]
         return [permission() for permission in permission_classes]
 
     def list(self, request, school_id):

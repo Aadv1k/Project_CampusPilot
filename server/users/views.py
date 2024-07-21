@@ -4,9 +4,8 @@ from rest_framework import status
 
 from django.conf import settings
 
-from utils.SMSService import SMSService
-
-from utils.TokenManager import TokenManager, UserTokenPayload 
+from services.SMSService import SMSService
+from services.TokenManager import TokenManager, UserTokenPayload
 
 from .serializers import UserVerificationSerializer, UserLoginSerializer
 from .models import UserContact
@@ -14,50 +13,52 @@ from api.exceptions import HTTPSerializerBadRequest, HTTPBadRequest, HTTPInterna
 
 from .throttling import OTPRequestThrottle, DisableThrottle
 
-from utils.OTPManager import otp_manager  
+from services.OTPManager import otp_manager
 
 sms_service = SMSService()
 
 @api_view(['POST'])
-@throttle_classes([DisableThrottle if settings.TESTING else OTPRequestThrottle])
-def user_login(request):
-    serializer = UserLoginSerializer(data=request.data)
+def user_login(request, school_id=None):
+    serializer = UserLoginSerializer(data={
+        "school_id": school_id,
+        "phone_number": request.data["phone_number"]
+    })
 
     if not serializer.is_valid():
         raise HTTPSerializerBadRequest(details=serializer.errors)
-
-    full_phone_number = f'{serializer.validated_data.get("country_code")}{serializer.validated_data.get("phone_number")}'
-
-    otp = otp_manager.create_and_store_otp(full_phone_number)
-    sent, message_or_error = sms_service.send_sms(f"+{full_phone_number}", otp)
-    if not sent:
-        raise HTTPInternalError(message="Unable to send OTP at the moment", details={"reason": message_or_error})
-
+    
+    phone_number = serializer.validated_data["phone_number"]
+    otp = otp_manager.generate_otp()
+    otp_manager.store_otp(phone_number, otp)
+    
     return Response({"message": f"Sent an OTP to the provided mobile number."}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-def user_verify(request):
+def user_verify(request, school_id=None):
     serializer = UserVerificationSerializer(data=request.data)
+
     if not serializer.is_valid():
         raise HTTPSerializerBadRequest(details=serializer.errors)
 
     phone_number = serializer.validated_data.get("phone_number")
-    country_code = serializer.validated_data.get("country_code")
+    otp = serializer.validated_data.get("otp")
+
+    if not otp_manager.verify_otp(phone_number, otp):
+        raise HTTPBadRequest(message="Invalid OTP or OTP has expired")
 
     user_contact = UserContact.objects.filter(
-        phone_number=phone_number,
-        country_code=country_code,
+        user__school_id=school_id,
+        contact_data=phone_number,
     ).first()
 
     if not user_contact:
-        raise HTTPBadRequest(message="User not found for the provided phone number and country code.")
+        raise HTTPBadRequest(message="Couldn't find any primary contact with that number")
 
     user = user_contact.user
     token = TokenManager.create_token(
         UserTokenPayload(
             user_id=user.id, 
             user_name=f"{user.first_name} {user.last_name}", 
-            )
         )
-
-    return Response({ "access_token": token }, status=status.HTTP_200_OK)
+    )
+    return Response({"data": {"access_token": token}}, status=status.HTTP_200_OK)

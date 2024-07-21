@@ -1,5 +1,4 @@
 from django.db import models
-from schools.models import School
 
 class Class(models.Model):
     standard = models.PositiveIntegerField()

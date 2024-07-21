@@ -2,8 +2,6 @@ from django.db import models
 
 from users.models import User
 
-import utils.utils as utils
-
 class Announcement(models.Model):
     announcer = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)

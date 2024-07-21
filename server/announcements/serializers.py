@@ -4,7 +4,7 @@ from classes.models import Class
 from users.models import User
 import re
 
-import utils.utils as utils
+import services.utils as utils
 
 from typing import NamedTuple, Callable, Optional
 

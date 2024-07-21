@@ -8,7 +8,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from utils.TokenManager import TokenManager, UserTokenPayload
+from services.TokenManager import TokenManager, UserTokenPayload
 
 class AnnouncementScopingTest(TestCase):
     def setUp(self):

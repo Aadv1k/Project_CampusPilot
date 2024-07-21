@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     "django_rq",
 
     "api",
-    "schools",
     "users",
     "classes",
     "announcements",
@@ -104,6 +103,7 @@ TWILIO_SID=os.getenv("TWILIO_SID")
 TWILIO_AUTH_TOKEN=os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_FROM_NUMBER=os.getenv("TWILIO_FROM_NUMBER")
 
+USE_REDIS = False
 REDIS_HOST=os.getenv("REDIS_HOST")
 REDIS_PORT=os.getenv("REDIS_PORT")
 REDIS_DB=os.getenv("REDIS_DB")
