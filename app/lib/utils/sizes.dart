@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+class ComponentSizes {
+  static const double buttonHeight = 76.0;
+  static const double buttonRadius = Radii.xl;
+}
+
 class Spacing {
-  static const double xxs = 2.0;
   static const double xs = 4.0;
   static const double sm = 8.0;
   static const double md = 16.0;
@@ -31,39 +35,6 @@ class Widths {
   static const double xl = 64.0;
   static const double xxl = 80.0;
   static const double xxxl = 96.0;
-}
-
-class Shadows {
-  static const BoxShadow xs = BoxShadow(
-    color: Color(0x19000000),
-    blurRadius: 2.0,
-    offset: Offset(0, 1),
-  );
-  static const BoxShadow sm = BoxShadow(
-    color: Color(0x1F000000),
-    blurRadius: 4.0,
-    offset: Offset(0, 2),
-  );
-  static const BoxShadow md = BoxShadow(
-    color: Color(0x33000000),
-    blurRadius: 6.0,
-    offset: Offset(0, 4),
-  );
-  static const BoxShadow lg = BoxShadow(
-    color: Color(0x4D000000),
-    blurRadius: 8.0,
-    offset: Offset(0, 8),
-  );
-  static const BoxShadow xl = BoxShadow(
-    color: Color(0x66000000),
-    blurRadius: 12.0,
-    offset: Offset(0, 12),
-  );
-  static const BoxShadow xxl = BoxShadow(
-    color: Color(0x80000000),
-    blurRadius: 16.0,
-    offset: Offset(0, 16),
-  );
 }
 
 class Radii {
