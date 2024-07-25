@@ -68,14 +68,14 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
             padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
             height: Heights.xxl,
             decoration: BoxDecoration(
-              color: Palette.slate200,
+              color: Palette.bgSecondary,
               border: Border.all(
                 color: widget.hasError
                     ? (isFocused ? Colors.red.shade600 : Colors.red.shade500)
-                    : (isFocused ? Palette.slate200 : Palette.slate100),
+                    : Colors.transparent,
                 width: 1.8,
               ),
-              borderRadius: BorderRadius.circular(Radii.xl),
+              borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,29 +83,25 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.sm, vertical: Spacing.md),
+                      horizontal: Spacing.md),
                   child: const Center(
                     child: Text(
                       "+91",
                       style: TextStyle(
                         fontSize: FontSize.base,
-                        color: Palette.slate500,
+                        color: Palette.subtitle,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
                 const VerticalDivider(
                   width: 6,
-                  // thickness: 1.2,
                   indent: Heights.sm,
                   endIndent: Heights.sm,
-                  color: Palette.slate400,
+                  color: Palette.subtitle,
                 ),
-                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Container(
-                    height: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                     child: Center(
                       child: TextField(
@@ -121,7 +117,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                           hintText: "Phone Number",
                           border: InputBorder.none,
                           hintStyle: TextStyle(
-                            color: Palette.slate500,
+                            color: Palette.subtitle,
                           ),
                         ),
                       ),
